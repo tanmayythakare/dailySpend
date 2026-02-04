@@ -16,3 +16,4 @@ application-local.yml
 # IDE
 .idea/
 .vscode/
+/.metadata/
