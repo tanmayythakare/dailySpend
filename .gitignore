@@ -1,0 +1,18 @@
+# OS
+.DS_Store
+
+# Java
+target/
+*.log
+
+# Node / Angular
+node_modules/
+dist/
+
+# Env
+.env
+application-local.yml
+
+# IDE
+.idea/
+.vscode/
