@@ -11,7 +11,6 @@ public class PersonMapper {
     public static Person toEntity(PersonRequest request) {
         Person person = new Person();
         person.setName(request.getName());
-        person.setCreatedAt(LocalDateTime.now());
         return person;
     }
 

@@ -1,8 +1,12 @@
 package com.example.dailyspend.controller;
 
 import com.example.dailyspend.dto.AccountBalanceDto;
-import com.example.dailyspend.entity.Account;
+import com.example.dailyspend.dto.AccountRequest;
+import com.example.dailyspend.dto.AccountResponse;
 import com.example.dailyspend.service.AccountService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,37 +24,20 @@ public class AccountController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Account>> getAllAccounts() {
+    public ResponseEntity<List<AccountResponse>> getAllAccounts() {
         return ResponseEntity.ok(accountService.findAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable Long id) {
-        return accountService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
-        return ResponseEntity.ok(accountService.save(account));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
-        accountService.deleteAccount(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<AccountResponse> createAccount(
+            @Valid @RequestBody AccountRequest request
+    ) {
+        return ResponseEntity.ok(accountService.createAccount(request));
     }
 
     @GetMapping("/{id}/balance")
     public ResponseEntity<BigDecimal> getAccountBalance(@PathVariable Long id) {
         return ResponseEntity.ok(accountService.getAccountBalance(id));
     }
-
-    @GetMapping("/balances")
-    public ResponseEntity<List<AccountBalanceDto>> getAllBalances() {
-        return ResponseEntity.ok(accountService.getAllAccountsWithBalances());
-    }
-    
 
 }

@@ -13,12 +13,17 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
 
     public AuthService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+            PasswordEncoder passwordEncoder,
+            JwtUtil jwtUtil) {
+this.userRepository = userRepository;
+this.passwordEncoder = passwordEncoder;
+this.jwtUtil = jwtUtil;
+}
+
 
     public void register(RegisterRequest request) {
         User user = new User();
@@ -35,6 +40,7 @@ public class AuthService {
             throw new RuntimeException("Invalid credentials");
         }
 
-        return JwtUtil.generateToken(user.getUsername());
+        return jwtUtil.generateToken(user.getUsername());
+
     }
 }

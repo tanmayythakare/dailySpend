@@ -22,6 +22,13 @@ public class Person {
     public Person() {
     }
 
+    // ===== Lifecycle Hooks =====
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     // ===== Getters & Setters =====
 
     public Long getId() {
@@ -43,8 +50,7 @@ public class Person {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
+    
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    // no setter needed for createdAt (optional but recommended)
 }

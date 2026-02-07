@@ -1,15 +1,19 @@
 package com.example.dailyspend.repository;
-
+import com.example.dailyspend.entity.Transaction;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.example.dailyspend.entity.Transaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.support.JpaRepositoryImplementation;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long>,JpaSpecificationExecutor<Transaction>{
 
     Page<Transaction> findByTransactionDateBetween(
             LocalDate startDate,
@@ -43,5 +47,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     	    WHERE t.account.id = :accountId
     	""")
     	BigDecimal calculateAccountBalance(Long accountId);
+    
+    
 
 }

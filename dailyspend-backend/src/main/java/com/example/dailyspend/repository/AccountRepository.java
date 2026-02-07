@@ -1,37 +1,32 @@
 package com.example.dailyspend.repository;
-import java.util.List;
-import java.util.Optional;
 
 import com.example.dailyspend.entity.Account;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import com.example.dailyspend.dto.AccountBalanceDto;
+import org.springframework.data.repository.query.Param;
+
+import java.math.BigDecimal;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
-	
-	@Query("""
-		    SELECT new com.example.dailyspend.dto.AccountBalanceDto(
-		        a.id,
-		        a.name,
-		        COALESCE(
-		            SUM(
-		                CASE
-		                    WHEN c.type = 'INCOME' THEN t.amount
-		                    ELSE -t.amount
-		                END
-		            ), 0
-		        )
-		    )
-		    FROM Account a
-		    LEFT JOIN Transaction t ON t.account.id = a.id
-		    LEFT JOIN t.category c
-		    GROUP BY a.id, a.name
-		""")
-		List<AccountBalanceDto> findAllAccountsWithBalances();
-		
-	List<Account> findByIsDeletedFalse();
-	Optional<Account> findByIdAndIsDeletedFalse(Long id);
 
-
+    /**
+     * Derived balance calculated from transactions using TransactionType.
+     *
+     * EXPENSE      -> subtract
+     * MONEY_GIVEN  -> subtract
+     * MONEY_TAKEN  -> add
+     */
+    @Query("""
+        SELECT COALESCE(SUM(
+            CASE
+                WHEN t.type = 'EXPENSE' THEN -t.amount
+                WHEN t.type = 'MONEY_GIVEN' THEN -t.amount
+                WHEN t.type = 'MONEY_TAKEN' THEN t.amount
+                ELSE 0
+            END
+        ), 0)
+        FROM Transaction t
+        WHERE t.account.id = :accountId
+    """)
+    BigDecimal getDerivedBalance(@Param("accountId") Long accountId);
 }

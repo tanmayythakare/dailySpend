@@ -4,8 +4,6 @@ import com.example.dailyspend.dto.AccountRequest;
 import com.example.dailyspend.dto.AccountResponse;
 import com.example.dailyspend.entity.Account;
 
-import java.time.LocalDateTime;
-
 public class AccountMapper {
 
     public static Account toEntity(AccountRequest request) {
@@ -13,7 +11,6 @@ public class AccountMapper {
         account.setName(request.getName());
         account.setType(request.getType());
         account.setBalance(request.getBalance());
-        account.setCreatedAt(LocalDateTime.now());
         return account;
     }
 

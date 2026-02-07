@@ -8,14 +8,13 @@ import java.math.BigDecimal;
 
 public class AccountRequest {
 
-    @NotBlank(message = "Account name must not be blank")
+	@NotBlank(message = "Account name must not be blank")
     private String name;
 
     @NotBlank(message = "Account type must not be blank")
-    private String type; // CASH / BANK / CREDIT
+    private String type;
 
-    @NotNull(message = "Initial balance is required")
-    @PositiveOrZero(message = "Balance cannot be negative")
+    @PositiveOrZero(message = "Balance must be zero or positive")
     private BigDecimal balance;
 
     // getters & setters

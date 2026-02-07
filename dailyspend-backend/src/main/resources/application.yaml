@@ -34,3 +34,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+jwt:
+  secret: this-is-my-super-secret-key-for-dailyspend
+  expiration: 3600000
+

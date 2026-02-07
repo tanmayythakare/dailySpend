@@ -9,7 +9,18 @@ public class AccountResponse {
     private String type;
     private BigDecimal balance;
 
-    // getters & setters
+    public AccountResponse() {
+    }
+
+    public AccountResponse(Long id, String name, String type, BigDecimal balance) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+        this.balance = balance;
+    }
+
+    // ===== Getters & Setters =====
+
     public Long getId() {
         return id;
     }
@@ -21,7 +32,7 @@ public class AccountResponse {
     public String getName() {
         return name;
     }
-    
+
     public void setName(String name) {
         this.name = name;
     }
@@ -29,7 +40,7 @@ public class AccountResponse {
     public String getType() {
         return type;
     }
-    
+
     public void setType(String type) {
         this.type = type;
     }
@@ -37,7 +48,7 @@ public class AccountResponse {
     public BigDecimal getBalance() {
         return balance;
     }
-    
+
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
     }

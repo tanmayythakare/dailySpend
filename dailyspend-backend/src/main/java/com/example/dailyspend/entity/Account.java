@@ -23,13 +23,21 @@ public class Account {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-    
+
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
     // ===== Constructors =====
 
     public Account() {
+    }
+
+    // ===== Lifecycle Hooks =====
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.isDeleted = false;
     }
 
     // ===== Getters & Setters =====
@@ -70,14 +78,13 @@ public class Account {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
+    // no setter for createdAt (intentionally immutable)
+
     public boolean isDeleted() {
         return isDeleted;
     }
 
     public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
+        this.isDeleted = deleted;
     }
 }
