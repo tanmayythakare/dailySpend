@@ -1,6 +1,6 @@
 package com.example.dailyspend.controller;
 
-import com.example.dailyspend.dto.AccountBalanceDto;
+
 import com.example.dailyspend.dto.AccountRequest;
 import com.example.dailyspend.dto.AccountResponse;
 import com.example.dailyspend.service.AccountService;
@@ -38,6 +38,10 @@ public class AccountController {
     @GetMapping("/{id}/balance")
     public ResponseEntity<BigDecimal> getAccountBalance(@PathVariable Long id) {
         return ResponseEntity.ok(accountService.getAccountBalance(id));
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountResponse> getAccountById(@PathVariable Long id) {
+        return ResponseEntity.ok(accountService.findById(id));
     }
 
 }

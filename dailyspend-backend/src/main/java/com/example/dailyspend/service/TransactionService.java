@@ -13,8 +13,6 @@ import org.springframework.data.jpa.domain.Specification;
 import com.example.dailyspend.dto.TransactionRequest;
 import com.example.dailyspend.dto.TransactionUpdateRequest;
 
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +46,7 @@ public class TransactionService {
     // ---------------- EXISTING API (KEEP FOR NOW) ----------------
 
     public List<Transaction> findAll() {
-        return transactionRepository.findAll();
+        return transactionRepository.findByDeletedFalse();
     }
 
     public Optional<Transaction> findById(Long id) {
@@ -151,12 +148,11 @@ public class TransactionService {
 
         if (startDate != null && endDate != null) {
             return transactionRepository
-                    .findByTransactionDateBetween(startDate, endDate, pageable);
+                    .findByTransactionDateBetweenAndDeletedFalse(startDate, endDate, pageable);
         }
 
-        return transactionRepository.findAll(pageable);
+        return transactionRepository.findByDeletedFalse(pageable);
     }
-
     // ---------------- NEW SEMANTIC API (STEP 1.5) ----------------
 
     @Transactional
@@ -182,7 +178,6 @@ public class TransactionService {
     }
     @Transactional
     public void deleteTransaction(Long transactionId) {
-
         Transaction tx = transactionRepository.findById(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
@@ -195,7 +190,6 @@ public class TransactionService {
         tx.setDeleted(true);
         transactionRepository.save(tx);
     }
-
 
     // ---------------- STUBS (STEP 1.6) ----------------
 
@@ -245,7 +239,7 @@ public class TransactionService {
                     account.setBalance(account.getBalance().subtract(tx.getAmount()));
         }
 
-        accountRepository.save(account);
+        accountRepository.saveAndFlush(account);
     }
 
 
@@ -266,7 +260,7 @@ public class TransactionService {
                     account.setBalance(account.getBalance().add(tx.getAmount()));
         }
 
-        accountRepository.save(account);
+        accountRepository.saveAndFlush(account);
     }
     private void validateTransactionInvariant(Transaction tx) {
 

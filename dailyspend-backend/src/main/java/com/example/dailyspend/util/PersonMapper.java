@@ -4,7 +4,6 @@ import com.example.dailyspend.dto.PersonRequest;
 import com.example.dailyspend.dto.PersonResponse;
 import com.example.dailyspend.entity.Person;
 
-import java.time.LocalDateTime;
 
 public class PersonMapper {
 

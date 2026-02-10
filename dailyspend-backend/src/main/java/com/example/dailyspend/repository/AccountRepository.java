@@ -26,7 +26,7 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
             END
         ), 0)
         FROM Transaction t
-        WHERE t.account.id = :accountId
+        WHERE t.account.id = :accountId AND t.deleted = false
     """)
     BigDecimal getDerivedBalance(@Param("accountId") Long accountId);
 }

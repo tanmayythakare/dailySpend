@@ -10,8 +10,6 @@ public class RegisterRequest {
     @NotBlank
     private String password;
 
-    // ===== Getters & Setters =====
-
     public String getUsername() {
         return username;
     }

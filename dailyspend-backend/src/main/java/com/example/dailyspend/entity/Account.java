@@ -24,8 +24,7 @@ public class Account {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
+    // ✅ REMOVED: is_deleted field (no matching DB column)
 
     // ===== Constructors =====
 
@@ -37,7 +36,7 @@ public class Account {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
-        this.isDeleted = false;
+        // ✅ REMOVED: this.isDeleted = false;
     }
 
     // ===== Getters & Setters =====
@@ -76,15 +75,5 @@ public class Account {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
-    }
-
-    // no setter for createdAt (intentionally immutable)
-
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.isDeleted = deleted;
     }
 }

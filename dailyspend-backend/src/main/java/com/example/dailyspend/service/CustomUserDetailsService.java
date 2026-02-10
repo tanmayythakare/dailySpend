@@ -1,6 +1,6 @@
 package com.example.dailyspend.service;
 
-import com.example.dailyspend.entity.User;
+import com.example.dailyspend.entity.AppUser;
 import com.example.dailyspend.repository.UserRepository;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
@@ -18,12 +18,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByUsername(username)
+        AppUser user = userRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found"));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
+        return User.builder()
+                .username(user.getUsername())
                 .password(user.getPassword())
                 .authorities("USER")
                 .build();

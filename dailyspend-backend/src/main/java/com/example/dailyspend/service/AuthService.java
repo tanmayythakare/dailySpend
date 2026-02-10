@@ -2,7 +2,7 @@ package com.example.dailyspend.service;
 
 import com.example.dailyspend.dto.LoginRequest;
 import com.example.dailyspend.dto.RegisterRequest;
-import com.example.dailyspend.entity.User;
+import com.example.dailyspend.entity.AppUser;
 import com.example.dailyspend.repository.UserRepository;
 import com.example.dailyspend.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,32 +15,38 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
-
-    public AuthService(UserRepository userRepository,
+    public AuthService(
+            UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtUtil jwtUtil) {
-this.userRepository = userRepository;
-this.passwordEncoder = passwordEncoder;
-this.jwtUtil = jwtUtil;
-}
 
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
     public void register(RegisterRequest request) {
-        User user = new User();
+
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalStateException("Username already exists");
+        }
+
+        AppUser user = new AppUser();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         userRepository.save(user);
     }
 
     public String login(LoginRequest request) {
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+
+        AppUser user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new IllegalStateException("Invalid credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new IllegalStateException("Invalid credentials");
         }
 
         return jwtUtil.generateToken(user.getUsername());
-
     }
 }

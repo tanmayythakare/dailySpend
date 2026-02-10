@@ -2,7 +2,6 @@ package com.example.dailyspend.config;
 
 import com.example.dailyspend.util.JwtUtil;
 import com.example.dailyspend.service.CustomUserDetailsService;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -28,25 +27,26 @@ public class SecurityConfig {
                 new JwtAuthenticationFilter(userDetailsService, jwtUtil);
 
         http
-            // Stateless API → no CSRF
+            // Disable CSRF completely
             .csrf(csrf -> csrf.disable())
 
-            // No HTTP session
+            // Stateless API
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // Authorization rules
-            .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
+            // 🔥 THIS IS THE IMPORTANT PART
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated()
             )
 
-            // JWT filter
+            // JWT filter AFTER permitAll is evaluated
             .addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class
             )
 
-            // Disable unused auth mechanisms
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
 

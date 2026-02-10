@@ -9,14 +9,14 @@ import java.time.LocalDate;
 public class TransactionSpecification {
 
     private TransactionSpecification() {
-
     }
+
     private static Specification<Transaction> notDeleted() {
         return (root, query, cb) ->
                 cb.isFalse(root.get("deleted"));
     }
 
-    public static Specification<Transaction> byAccount(Long accountId) {
+    public static Specification<Transaction> hasAccount(Long accountId) {
         return Specification
                 .where(notDeleted())
                 .and((root, query, cb) ->
@@ -24,7 +24,7 @@ public class TransactionSpecification {
                 );
     }
 
-    public static Specification<Transaction> byCategory(Long categoryId) {
+    public static Specification<Transaction> hasCategory(Long categoryId) {
         return Specification
                 .where(notDeleted())
                 .and((root, query, cb) ->
@@ -32,7 +32,7 @@ public class TransactionSpecification {
                 );
     }
 
-    public static Specification<Transaction> byPerson(Long personId) {
+    public static Specification<Transaction> hasPerson(Long personId) {
         return Specification
                 .where(notDeleted())
                 .and((root, query, cb) ->
@@ -40,7 +40,7 @@ public class TransactionSpecification {
                 );
     }
 
-    public static Specification<Transaction> byType(TransactionType type) {
+    public static Specification<Transaction> hasType(TransactionType type) {
         return Specification
                 .where(notDeleted())
                 .and((root, query, cb) ->
@@ -68,7 +68,7 @@ public class TransactionSpecification {
                 );
     }
 
-    public static Specification<Transaction> dateBetween(
+    public static Specification<Transaction> betweenDates(
             LocalDate fromDate,
             LocalDate toDate
     ) {
