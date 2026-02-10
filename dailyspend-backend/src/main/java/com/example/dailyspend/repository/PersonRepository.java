@@ -6,21 +6,25 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
+    // ================= USER SCOPED =================
+
+    List<Person> findByUserId(Long userId);
+
+    // ================= BUSINESS LOGIC =================
+
     /**
      * Calculate person balance:
-     * - MONEY_GIVEN adds to what they owe you (positive)
-     * - MONEY_TAKEN subtracts from what they owe you (negative)
-     * 
-     * Positive balance = They owe you money
-     * Negative balance = You owe them money
+     * Positive = they owe you
+     * Negative = you owe them
      */
     @Query("""
         SELECT COALESCE(
             SUM(
-                CASE 
+                CASE
                     WHEN t.type = 'MONEY_GIVEN' THEN t.amount
                     WHEN t.type = 'MONEY_TAKEN' THEN -t.amount
                     ELSE 0

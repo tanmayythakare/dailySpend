@@ -1,5 +1,4 @@
 package com.example.dailyspend.entity;
-
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -7,6 +6,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "accounts")
 public class Account {
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -75,5 +78,12 @@ public class Account {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

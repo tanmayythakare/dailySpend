@@ -45,16 +45,6 @@ public class TransactionController {
 
     // -------- CREATE APIs --------
 
-    @PostMapping
-    public ResponseEntity<TransactionResponse> createTransaction(
-            @Valid @RequestBody TransactionRequest request) {
-
-        Transaction saved = transactionService.createTransaction(request);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(toResponse(saved));
-    }
-
     @PostMapping("/expense")
     public ResponseEntity<TransactionResponse> createExpense(
             @Valid @RequestBody ExpenseRequestDto request) {
@@ -108,7 +98,7 @@ public class TransactionController {
 
     @GetMapping("/filter")
     public ResponseEntity<Page<TransactionResponse>> filterTransactions(
-            TransactionFilterDto filter,
+    		 @ModelAttribute TransactionFilterDto filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "transactionDate") String sortBy,

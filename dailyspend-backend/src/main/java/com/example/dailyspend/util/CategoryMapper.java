@@ -4,15 +4,12 @@ import com.example.dailyspend.dto.CategoryRequest;
 import com.example.dailyspend.dto.CategoryResponse;
 import com.example.dailyspend.entity.Category;
 
-import java.time.LocalDateTime;
-
 public class CategoryMapper {
 
     public static Category toEntity(CategoryRequest request) {
         Category category = new Category();
         category.setName(request.getName());
         category.setType(request.getType());
-        category.setCreatedAt(LocalDateTime.now());
         return category;
     }
 

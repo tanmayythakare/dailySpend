@@ -6,16 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    /**
-     * Derived balance calculated from transactions using TransactionType.
-     *
-     * EXPENSE      -> subtract
-     * MONEY_GIVEN  -> subtract
-     * MONEY_TAKEN  -> add
-     */
+    List<Account> findByUserId(Long userId);
+
     @Query("""
         SELECT COALESCE(SUM(
             CASE

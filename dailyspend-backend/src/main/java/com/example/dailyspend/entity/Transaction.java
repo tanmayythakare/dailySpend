@@ -1,5 +1,4 @@
 package com.example.dailyspend.entity;
-
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,7 +8,10 @@ import java.time.LocalDateTime;
 @Table(name = "transactions")
 public class Transaction {
 	
-
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	private User user;
+	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -50,6 +52,7 @@ public class Transaction {
     
     @Column(nullable = false)
     private boolean deleted = false;
+    
 
     public boolean isDeleted() {
         return deleted;
@@ -157,5 +160,12 @@ public class Transaction {
 
     public void setType(TransactionType type) {
         this.type = type;
+    }
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

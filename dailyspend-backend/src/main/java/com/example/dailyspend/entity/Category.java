@@ -17,22 +17,23 @@ public class Category {
     @Column(nullable = false, length = 20)
     private String type;
 
+    // 🔒 MULTI-USER SUPPORT (NULL = GLOBAL CATEGORY)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = true)
+    private User user;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // ===== Constructors =====
-
-    public Category() {
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     // ===== Getters & Setters =====
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -51,11 +52,16 @@ public class Category {
         this.type = type;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    // ✅ REQUIRED FOR CategoryService
+    public User getUser() {
+        return user;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

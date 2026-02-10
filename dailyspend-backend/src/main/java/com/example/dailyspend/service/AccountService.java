@@ -5,6 +5,7 @@ import com.example.dailyspend.dto.AccountResponse;
 import com.example.dailyspend.entity.Account;
 import com.example.dailyspend.exception.ResourceNotFoundException;
 import com.example.dailyspend.repository.AccountRepository;
+import com.example.dailyspend.util.SecurityUtils;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,22 +18,29 @@ import java.util.stream.Collectors;
 public class AccountService {
 
     private final AccountRepository accountRepository;
+    private final SecurityUtils securityUtils;
 
-    public AccountService(AccountRepository accountRepository) {
+    public AccountService(AccountRepository accountRepository,
+                          SecurityUtils securityUtils) {
         this.accountRepository = accountRepository;
+        this.securityUtils = securityUtils;
     }
 
     // -------- READ --------
-
+    @Transactional(readOnly = true)
     public List<AccountResponse> findAll() {
-        return accountRepository.findAll()
+        Long userId = securityUtils.getCurrentUserId();
+        return accountRepository.findByUserId(userId)
                 .stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
-
+    
+    @Transactional(readOnly = true)
     public AccountResponse findById(Long accountId) {
+        Long userId = securityUtils.getCurrentUserId();
         Account account = accountRepository.findById(accountId)
+                .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
         return toResponse(account);
     }
@@ -41,23 +49,30 @@ public class AccountService {
 
     @Transactional
     public AccountResponse createAccount(AccountRequest request) {
+        Long userId = securityUtils.getCurrentUserId();
+
         Account account = new Account();
         account.setName(request.getName());
         account.setType(request.getType());
         account.setBalance(request.getBalance());
+
+        // IMPORTANT: set only user ID via proxy
+        account.setUser(new com.example.dailyspend.entity.User() {{
+            setId(userId);
+        }});
 
         return toResponse(accountRepository.save(account));
     }
 
     // -------- BALANCE --------
 
-    /**
-     * Derived balance — calculated from transactions
-     */
+    @Transactional(readOnly = true)
     public BigDecimal getAccountBalance(Long accountId) {
-        accountRepository.findById(accountId)
+        Long userId = securityUtils.getCurrentUserId();
+        Account account = accountRepository.findById(accountId)
+                .filter(a -> a.getUser().getId().equals(userId))
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
-        return accountRepository.getDerivedBalance(accountId);
+        return accountRepository.getDerivedBalance(account.getId());
     }
 
     // -------- MAPPER --------

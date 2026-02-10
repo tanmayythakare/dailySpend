@@ -7,6 +7,10 @@ import java.time.LocalDateTime;
 @Table(name = "people")
 public class Person {
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,8 +23,7 @@ public class Person {
 
     // ===== Constructors =====
 
-    public Person() {
-    }
+    public Person() {}
 
     // ===== Lifecycle Hooks =====
 
@@ -50,7 +53,12 @@ public class Person {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    
 
-    // no setter needed for createdAt (optional but recommended)
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
