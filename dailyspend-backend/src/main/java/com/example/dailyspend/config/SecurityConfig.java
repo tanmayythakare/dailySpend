@@ -2,8 +2,10 @@ package com.example.dailyspend.config;
 
 import com.example.dailyspend.util.JwtUtil;
 import com.example.dailyspend.service.CustomUserDetailsService;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,6 +14,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -27,26 +33,19 @@ public class SecurityConfig {
                 new JwtAuthenticationFilter(userDetailsService, jwtUtil);
 
         http
-            // Disable CSRF completely
+            .cors(cors -> {})   // ✅ Modern Boot 3 style
             .csrf(csrf -> csrf.disable())
-
-            // Stateless API
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-
-            // 🔥 THIS IS THE IMPORTANT PART
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .anyRequest().authenticated()
             )
-
-            // JWT filter AFTER permitAll is evaluated
             .addFilterBefore(
                 jwtFilter,
                 UsernamePasswordAuthenticationFilter.class
             )
-
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
 
@@ -56,5 +55,22 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
     }
 }

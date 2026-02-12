@@ -1,0 +1,20 @@
+<h2>Register</h2>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+  <input type="text" formControlName="username" placeholder="Username" />
+  <input type="email" formControlName="email" placeholder="Email" />
+  <input type="password" formControlName="password" placeholder="Password" />
+  <input type="password" formControlName="confirmPassword" placeholder="Confirm Password" />
+
+  <div *ngIf="form.errors?.['passwordMismatch']" style="color:red">
+    Passwords do not match
+  </div>
+
+  <button type="submit" [disabled]="loading">
+    {{ loading ? 'Registering...' : 'Register' }}
+  </button>
+
+  <p *ngIf="error" style="color:red">{{ error }}</p>
+
+</form>

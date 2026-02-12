@@ -65,7 +65,6 @@ public class PersonService {
 
     @Transactional
     public void deleteById(Long id) {
-        Person person = findById(id);
 
         boolean hasTransactions = transactionRepository.existsByPersonId(id);
         if (hasTransactions) {

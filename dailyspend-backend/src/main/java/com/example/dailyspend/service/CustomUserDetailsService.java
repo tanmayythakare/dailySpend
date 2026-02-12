@@ -1,7 +1,11 @@
 package com.example.dailyspend.service;
 
-import com.example.dailyspend.entity.AppUser;
+import com.example.dailyspend.entity.User;
 import com.example.dailyspend.repository.UserRepository;
+
+import java.util.List;
+
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
@@ -15,17 +19,18 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+public UserDetails loadUserByUsername(String username)
+        throws UsernameNotFoundException {
 
-        AppUser user = userRepository.findByUsername(username)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found"));
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() ->
+                    new UsernameNotFoundException("User not found"));
 
-        return User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword())
-                .authorities("USER")
-                .build();
-    }
+    return new org.springframework.security.core.userdetails.User(
+            user.getUsername(),
+            user.getPassword(),
+            List.of(new SimpleGrantedAuthority("ROLE_USER"))
+    );
+}
+
 }

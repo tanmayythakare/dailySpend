@@ -3,6 +3,7 @@ package com.example.dailyspend.service;
 import com.example.dailyspend.dto.AccountRequest;
 import com.example.dailyspend.dto.AccountResponse;
 import com.example.dailyspend.entity.Account;
+import com.example.dailyspend.entity.User;
 import com.example.dailyspend.exception.ResourceNotFoundException;
 import com.example.dailyspend.repository.AccountRepository;
 import com.example.dailyspend.util.SecurityUtils;
@@ -48,21 +49,21 @@ public class AccountService {
     // -------- CREATE --------
 
     @Transactional
-    public AccountResponse createAccount(AccountRequest request) {
-        Long userId = securityUtils.getCurrentUserId();
+public AccountResponse createAccount(AccountRequest request) {
 
-        Account account = new Account();
-        account.setName(request.getName());
-        account.setType(request.getType());
-        account.setBalance(request.getBalance());
+    Long userId = securityUtils.getCurrentUserId();
 
-        // IMPORTANT: set only user ID via proxy
-        account.setUser(new com.example.dailyspend.entity.User() {{
-            setId(userId);
-        }});
+    Account account = new Account();
+    account.setName(request.getName());
+    account.setType(request.getType());
+    account.setBalance(request.getBalance());
 
-        return toResponse(accountRepository.save(account));
-    }
+    User user = new User();
+    user.setId(userId);
+    account.setUser(user);
+
+    return toResponse(accountRepository.save(account));
+}
 
     // -------- BALANCE --------
 

@@ -1,31 +1,44 @@
 package com.example.dailyspend.util;
 
-import com.example.dailyspend.entity.AppUser;
+import com.example.dailyspend.entity.User;
+import com.example.dailyspend.repository.UserRepository;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
 public class SecurityUtils {
 
-    /**
-     * Returns authenticated AppUser
-     */
-    public AppUser getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    private final UserRepository userRepository;
+
+    public SecurityUtils(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public Long getCurrentUserId() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalStateException("No authenticated user found");
         }
 
-        return (AppUser) authentication.getPrincipal();
-    }
+        Object principal = authentication.getPrincipal();
 
-    /**
-     * Returns authenticated user's ID (SAFE FOR DOMAIN USE)
-     */
-    public Long getCurrentUserId() {
-        return getCurrentUser().getId();
+        String username;
+
+        if (principal instanceof UserDetails userDetails) {
+            username = userDetails.getUsername();
+        } else {
+            throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalStateException("User not found in DB"));
+
+        return user.getId();
     }
 }

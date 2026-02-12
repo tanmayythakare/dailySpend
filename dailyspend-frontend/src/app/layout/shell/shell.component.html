@@ -1,0 +1,20 @@
+<div class="layout">
+
+  <aside class="sidebar">
+    <h3>DailySpend</h3>
+
+    <nav>
+      <a routerLink="/dashboard">Dashboard</a>
+      <a routerLink="/transactions">Transactions</a>
+      <a routerLink="/people">People</a>
+      <a routerLink="/reports">Reports</a>
+    </nav>
+
+    <button (click)="logout()">Logout</button>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
+</div>
