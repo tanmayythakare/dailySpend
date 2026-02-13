@@ -1,0 +1,45 @@
+<h2>Reports</h2>
+
+<!-- SUMMARY -->
+<div class="summary">
+
+  <div class="card">
+    <h3>Total Expense</h3>
+    <p>{{ totalExpense }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Money Given</h3>
+    <p>{{ totalGiven }}</p>
+  </div>
+
+  <div class="card">
+    <h3>Money Taken</h3>
+    <p>{{ totalTaken }}</p>
+  </div>
+
+</div>
+
+<!-- PIE CHART -->
+<h3>Expense by Category</h3>
+
+<canvas
+  baseChart
+  [data]="{
+    labels: pieLabels,
+    datasets: [{ data: pieData }]
+  }"
+  chartType="pie">
+</canvas>
+
+<!-- LINE CHART -->
+<h3>Expense Over Time</h3>
+
+<canvas
+  baseChart
+  [data]="{
+    labels: lineLabels,
+    datasets: [{ data: lineData, label: 'Expenses' }]
+  }"
+  chartType="line">
+</canvas>

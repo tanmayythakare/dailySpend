@@ -1,5 +1,6 @@
 package com.example.dailyspend.dto;
 
+import com.example.dailyspend.entity.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -7,11 +8,102 @@ public class TransactionResponse {
 
     private Long id;
     private BigDecimal amount;
-    private LocalDate transactionDate;
+    private TransactionType type;  // ✅ ADDED
     private String description;
-    private String accountName;
-    private String categoryName;
-    private String personName;
+    private LocalDate transactionDate;
+
+    // ✅ CHANGED: Nested objects instead of flat strings
+    private AccountInfo account;
+    private CategoryInfo category;
+    private PersonInfo person;
+
+    // ===== Nested Classes =====
+
+    public static class AccountInfo {
+        private Long id;
+        private String name;
+
+        public AccountInfo() {}
+
+        public AccountInfo(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class CategoryInfo {
+        private Long id;
+        private String name;
+
+        public CategoryInfo() {}
+
+        public CategoryInfo(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    public static class PersonInfo {
+        private Long id;
+        private String name;
+
+        public PersonInfo() {}
+
+        public PersonInfo(Long id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public Long getId() {
+            return id;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    // ===== Main Getters & Setters =====
 
     public Long getId() {
         return id;
@@ -29,12 +121,12 @@ public class TransactionResponse {
         this.amount = amount;
     }
 
-    public LocalDate getTransactionDate() {
-        return transactionDate;
+    public TransactionType getType() {
+        return type;
     }
 
-    public void setTransactionDate(LocalDate transactionDate) {
-        this.transactionDate = transactionDate;
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public String getDescription() {
@@ -45,27 +137,35 @@ public class TransactionResponse {
         this.description = description;
     }
 
-    public String getAccountName() {
-        return accountName;
+    public LocalDate getTransactionDate() {
+        return transactionDate;
     }
 
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
     }
 
-    public String getCategoryName() {
-        return categoryName;
+    public AccountInfo getAccount() {
+        return account;
     }
 
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
+    public void setAccount(AccountInfo account) {
+        this.account = account;
     }
 
-    public String getPersonName() {
-        return personName;
+    public CategoryInfo getCategory() {
+        return category;
     }
 
-    public void setPersonName(String personName) {
-        this.personName = personName;
+    public void setCategory(CategoryInfo category) {
+        this.category = category;
+    }
+
+    public PersonInfo getPerson() {
+        return person;
+    }
+
+    public void setPerson(PersonInfo person) {
+        this.person = person;
     }
 }

@@ -1,0 +1,54 @@
+<div *ngIf="person">
+
+  <h2>{{ person.name }}</h2>
+
+  <h3>
+    Balance:
+    <span [ngClass]="{
+      'positive': getBalance() > 0,
+      'negative': getBalance() < 0
+    }">
+      {{ getBalance() }}
+    </span>
+  </h3>
+
+</div>
+
+<!-- LOADING -->
+<div *ngIf="loading">
+  Loading ledger...
+</div>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && transactions.length === 0">
+  No transactions with this person
+</div>
+
+<!-- TRANSACTION LIST -->
+<table *ngIf="!loading && transactions.length > 0">
+
+  <tr>
+    <th>Date</th>
+    <th>Type</th>
+    <th>Description</th>
+    <th>Amount</th>
+  </tr>
+
+  <tr *ngFor="let tx of transactions">
+
+    <td>{{ tx.transactionDate | date:'dd MMM yyyy' }}</td>
+
+    <td>{{ tx.type }}</td>
+
+    <td>{{ tx.description }}</td>
+
+    <td [ngClass]="{
+      'positive': tx.type === 'MONEY_TAKEN',
+      'negative': tx.type === 'MONEY_GIVEN'
+    }">
+      {{ tx.amount }}
+    </td>
+
+  </tr>
+
+</table>

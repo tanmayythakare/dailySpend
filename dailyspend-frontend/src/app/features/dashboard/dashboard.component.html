@@ -1,51 +1,57 @@
 <h1>Dashboard</h1>
 
-<h3>Create Account</h3>
+<div class="messages">
+  <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>
 
-<input
-  type="text"
-  placeholder="Account Name"
-  [(ngModel)]="newAccountName"
-  name="name"
-/>
+<h2>Create Account</h2>
 
-<input
-  type="number"
-  placeholder="Initial Balance"
-  [(ngModel)]="newAccountBalance"
-  name="balance"
-/>
+<div class="form-container">
+  <input
+    type="text"
+    placeholder="Account Name"
+    [(ngModel)]="newAccountName"
+  />
 
-<select
-  [(ngModel)]="newAccountType"
-  name="type"
->
-  <option value="" disabled>Select account type</option>
+  <input
+    type="number"
+    placeholder="Initial Balance"
+    [(ngModel)]="newAccountBalance"
+  />
 
-  <option *ngFor="let type of accountTypes" [value]="type">
-    {{ type }}
-  </option>
-</select>
+  <select [(ngModel)]="newAccountType">
+    <option value="" disabled>Select account type</option>
+    <option *ngFor="let type of accountTypes" [value]="type">
+      {{ type }}
+    </option>
+  </select>
 
-<button (click)="createAccount()">Create</button>
+  <button (click)="createAccount()" [disabled]="creating">
+    {{ creating ? 'Creating...' : 'Create Account' }}
+  </button>
+</div>
 
 <hr />
 
 <div *ngIf="loading">Loading accounts...</div>
 
+<div class="accounts-grid" *ngIf="!loading && accounts.length > 0">
+  <div class="account-card" *ngFor="let account of accounts">
+    <h3>{{ account.name }}</h3>
+    <p><strong>Type:</strong> {{ account.type }}</p>
+    <p><strong>Balance:</strong> {{ formatCurrency(account.balance) }}</p>
+
+    <button class="delete-btn" (click)="deleteAccount(account.id!)">
+      Delete
+    </button>
+  </div>
+</div>
+
 <div *ngIf="!loading && accounts.length === 0">
   No accounts found.
 </div>
 
-<div *ngIf="!loading && accounts.length > 0">
-  <h3>Your Accounts</h3>
-  <div *ngFor="let account of accounts">
-    <strong>{{ account.name }}</strong>
-    - Balance: {{ account.balance ?? 0 }}
-    - Type: {{ account.type }}
-  </div>
-</div>
+<hr />
 
-<h3 *ngIf="!loading">
-  Total Net Worth: {{ totalBalance }}
-</h3>
+<h2>Total Net Worth: {{ formatCurrency(totalBalance) }}</h2>

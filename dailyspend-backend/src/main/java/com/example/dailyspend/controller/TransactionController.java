@@ -5,7 +5,7 @@ import com.example.dailyspend.entity.Transaction;
 import com.example.dailyspend.service.TransactionService;
 
 import jakarta.validation.Valid;
-
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -120,26 +120,36 @@ public class TransactionController {
     // -------- RESPONSE MAPPER (CRITICAL FIX) --------
 
     private TransactionResponse toResponse(Transaction tx) {
+    TransactionResponse response = new TransactionResponse();
 
-        TransactionResponse response = new TransactionResponse();
+    response.setId(tx.getId());
+    response.setAmount(tx.getAmount());
+    response.setType(tx.getType());  // ✅ ADDED
+    response.setTransactionDate(tx.getTransactionDate());
+    response.setDescription(tx.getDescription());
 
-        response.setId(tx.getId());
-        response.setAmount(tx.getAmount());
-        response.setTransactionDate(tx.getTransactionDate());
-        response.setDescription(tx.getDescription());
-
-        response.setAccountName(
-                tx.getAccount() != null ? tx.getAccount().getName() : null
-        );
-
-        response.setCategoryName(
-                tx.getCategory() != null ? tx.getCategory().getName() : null
-        );
-
-        response.setPersonName(
-                tx.getPerson() != null ? tx.getPerson().getName() : null
-        );
-
-        return response;
+    // ✅ CREATE NESTED OBJECTS
+    if (tx.getAccount() != null) {
+        response.setAccount(new TransactionResponse.AccountInfo(
+            tx.getAccount().getId(),
+            tx.getAccount().getName()
+        ));
     }
+
+    if (tx.getCategory() != null) {
+        response.setCategory(new TransactionResponse.CategoryInfo(
+            tx.getCategory().getId(),
+            tx.getCategory().getName()
+        ));
+    }
+
+    if (tx.getPerson() != null) {
+        response.setPerson(new TransactionResponse.PersonInfo(
+            tx.getPerson().getId(),
+            tx.getPerson().getName()
+        ));
+    }
+
+    return response;
+}
 }

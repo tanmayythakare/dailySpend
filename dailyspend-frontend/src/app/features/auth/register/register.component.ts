@@ -2,12 +2,13 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
-  ReactiveFormsModule,
   Validators,
+  ReactiveFormsModule,
   AbstractControl,
   ValidationErrors
 } from '@angular/forms';
 import { Router } from '@angular/router';
+
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../models/auth.model';
 
@@ -15,7 +16,8 @@ import { RegisterRequest } from '../../../models/auth.model';
   selector: 'app-register',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './register.component.html'
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
 
@@ -26,26 +28,32 @@ export class RegisterComponent {
   loading = false;
   error: string | null = null;
 
-  form = this.fb.group({
-    username: ['', Validators.required],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [
-      Validators.required,
-      Validators.minLength(8),
-      Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/)
-    ]],
-    confirmPassword: ['', Validators.required]
-  }, { validators: this.passwordMatchValidator });
+  form = this.fb.group(
+    {
+      username: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required]
+    },
+    { validators: this.passwordMatchValidator }
+  );
 
-  passwordMatchValidator(group: AbstractControl): ValidationErrors | null {
-    const password = group.get('password')?.value;
-    const confirm = group.get('confirmPassword')?.value;
+  // 🔐 Password match validator
+  passwordMatchValidator(
+    control: AbstractControl
+  ): ValidationErrors | null {
 
-    return password === confirm ? null : { passwordMismatch: true };
+    const password = control.get('password')?.value;
+    const confirmPassword = control.get('confirmPassword')?.value;
+
+    return password === confirmPassword
+      ? null
+      : { passwordMismatch: true };
   }
 
   onSubmit() {
 
+    // UX guard (NOT security)
     if (this.form.invalid) return;
 
     this.loading = true;
@@ -53,13 +61,22 @@ export class RegisterComponent {
 
     const formValue = this.form.value;
 
-const request: RegisterRequest = {
-  username: formValue.username!,
-  email: formValue.email!,
-  password: formValue.password!
-};
+    const request: RegisterRequest = {
+      username: formValue.username!,
+      email: formValue.email!,
+      password: formValue.password!
+    };
 
-this.authService.register(request)
-
+    this.authService.register(request).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = err?.error?.message || 'Registration failed';
+        console.error('Register error:', err);
+      }
+    });
   }
 }

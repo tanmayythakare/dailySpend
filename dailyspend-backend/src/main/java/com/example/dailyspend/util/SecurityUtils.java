@@ -18,6 +18,7 @@ public class SecurityUtils {
     }
 
     public Long getCurrentUserId() {
+        
 
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
@@ -27,6 +28,10 @@ public class SecurityUtils {
         }
 
         Object principal = authentication.getPrincipal();
+
+        System.out.println("AUTH: " + authentication);
+        System.out.println("Principal: " + authentication.getPrincipal());
+
 
         String username;
 

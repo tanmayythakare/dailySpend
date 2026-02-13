@@ -6,7 +6,7 @@ spring:
     name: dailyspend-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/dailyspend
+    url: jdbc:postgresql://localhost:5432/dailyspend_db
     username: postgres
     password: pass123
     driver-class-name: org.postgresql.Driver
@@ -36,5 +36,5 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 jwt:
   secret: this-is-my-super-secret-key-for-dailyspend
-  expiration: 3600000
+  expiration: 864000000 
 

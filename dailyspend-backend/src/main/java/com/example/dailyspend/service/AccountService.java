@@ -64,6 +64,22 @@ public AccountResponse createAccount(AccountRequest request) {
 
     return toResponse(accountRepository.save(account));
 }
+@Transactional
+public void deleteAccount(Long id) {
+
+    Long userId = securityUtils.getCurrentUserId();
+
+    Account account = accountRepository.findByIdAndUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+    
+    if (!account.getUser().getId().equals(userId)) {
+        throw new RuntimeException("Forbidden: Cannot delete another user's account");
+    }
+
+    accountRepository.delete(account);
+}
+
+
 
     // -------- BALANCE --------
 

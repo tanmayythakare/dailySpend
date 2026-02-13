@@ -1,0 +1,55 @@
+<h2>Create Transaction</h2>
+
+<select [(ngModel)]="type">
+  <option value="EXPENSE">Expense</option>
+  <option value="MONEY_GIVEN">Money Given</option>
+  <option value="MONEY_TAKEN">Money Taken</option>
+</select>
+
+<select [(ngModel)]="selectedAccountId">
+  <option [ngValue]="null">Select account</option>
+  <option *ngFor="let acc of accounts" [ngValue]="acc.id">
+    {{ acc.name }}
+  </option>
+</select>
+
+<div *ngIf="type === 'EXPENSE'">
+  <select [(ngModel)]="selectedCategoryId">
+    <option [ngValue]="null">Select category</option>
+    <option *ngFor="let cat of categories" [ngValue]="cat.id">
+      {{ cat.name }}
+    </option>
+  </select>
+</div>
+
+<div *ngIf="type !== 'EXPENSE'">
+
+  <select
+    [(ngModel)]="selectedPersonId"
+    (ngModelChange)="creatingPerson = ($event === 'new')"
+  >
+    <option [ngValue]="null">Select person</option>
+    <option *ngFor="let p of people" [ngValue]="p.id">
+      {{ p.name }}
+    </option>
+    <option value="new">➕ Add New Person</option>
+  </select>
+
+  <div *ngIf="creatingPerson">
+    <input
+      type="text"
+      placeholder="Person name"
+      [(ngModel)]="newPersonName"
+    />
+    <button (click)="createNewPerson()">Save Person</button>
+  </div>
+
+</div>
+
+<input type="number" placeholder="Amount" [(ngModel)]="amount" />
+<input type="text" placeholder="Description" [(ngModel)]="description" />
+<input type="date" [(ngModel)]="date" />
+
+<button (click)="submit()" [disabled]="loading">
+  Create
+</button>

@@ -1,0 +1,183 @@
+<h2>Transactions</h2>
+
+<div class="actions">
+  <button mat-stroked-button (click)="toggleFilters()">
+  {{ showFilters ? 'Hide Filters' : 'Show Filters' }}
+</button>
+  <button mat-raised-button color="primary" (click)="openAddTransactionDialog()">
+    + Add Transaction
+  </button>
+</div>
+<!-- FILTER PANEL -->
+<div *ngIf="showFilters" class="filter-panel" [formGroup]="filterForm">
+
+  <mat-form-field appearance="outline">
+    <mat-label>Sort By</mat-label>
+    <mat-select formControlName="sortOption">
+      <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+  <mat-form-field appearance="outline">
+    <mat-label>Account</mat-label>
+    <mat-select formControlName="accountId">
+      <mat-option [value]="null">All Accounts</mat-option>
+      <mat-option *ngFor="let acc of accounts" [value]="acc.id">
+        {{ acc.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Type</mat-label>
+    <mat-select formControlName="type">
+      <mat-option [value]="null">All Types</mat-option>
+      <mat-option *ngFor="let type of transactionTypes" [value]="type.value">
+        {{ type.label }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Start Date</mat-label>
+    <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+    <mat-datepicker #startPicker></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>End Date</mat-label>
+    <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+    <mat-datepicker #endPicker></mat-datepicker>
+  </mat-form-field>
+
+  <button mat-stroked-button (click)="clearFilters()">Clear</button>
+
+</div>
+
+<!-- LOADING -->
+<div *ngIf="loading" class="loading">
+  <mat-spinner diameter="40"></mat-spinner>
+</div>
+
+<!-- EMPTY STATE -->
+<div *ngIf="!loading && transactions.length === 0" class="empty-state">
+  <p>No transactions found</p>
+  <button mat-raised-button color="primary" (click)="openAddTransactionDialog()">
+    Add Your First Transaction
+  </button>
+</div>
+
+<!-- TABLE -->
+<table mat-table [dataSource]="transactions" *ngIf="!loading && transactions.length > 0" class="mat-elevation-z2">
+
+  <ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef>Date</th>
+    <td mat-cell *matCellDef="let tx">
+  <ng-container *ngIf="editingId !== tx.id">
+    {{ tx.transactionDate | date:'dd MMM yyyy' }}
+  </ng-container>
+
+  <ng-container *ngIf="editingId === tx.id">
+    <input type="date" [(ngModel)]="editData.transactionDate">
+  </ng-container>
+</td>
+  </ng-container>
+  <ng-container matColumnDef="type">
+  <th mat-header-cell *matHeaderCellDef>Type</th>
+  <td mat-cell *matCellDef="let tx">
+    
+    <!-- NORMAL MODE -->
+    <ng-container *ngIf="editingId !== tx.id">
+      {{ getTypeLabel(tx.type) }}
+    </ng-container>
+
+    <!-- EDIT MODE -->
+    <ng-container *ngIf="editingId === tx.id">
+      <select [(ngModel)]="editData.type">
+        <option value="EXPENSE">Expense</option>
+        <option value="MONEY_GIVEN">Money Given</option>
+        <option value="MONEY_TAKEN">Money Taken</option>
+      </select>
+    </ng-container>
+  </td>
+</ng-container>
+  <ng-container matColumnDef="description">
+    <th mat-header-cell *matHeaderCellDef>Description</th>
+    <td mat-cell *matCellDef="let tx">
+  <ng-container *ngIf="editingId !== tx.id">
+    {{ tx.description }}
+  </ng-container>
+
+  <ng-container *ngIf="editingId === tx.id">
+    <input [(ngModel)]="editData.description">
+  </ng-container>
+</td>
+
+  </ng-container>
+
+  <ng-container matColumnDef="account">
+    <th mat-header-cell *matHeaderCellDef>Account</th>
+    <td mat-cell *matCellDef="let tx">
+      {{ tx.account?.name }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="amount">
+    <th mat-header-cell *matHeaderCellDef>Amount</th>
+    <td mat-cell *matCellDef="let tx">
+  <ng-container *ngIf="editingId !== tx.id">
+    {{ tx.amount }}
+  </ng-container>
+  <ng-container *ngIf="editingId === tx.id">
+    <input type="number" [(ngModel)]="editData.amount">
+  </ng-container>
+</td>
+
+
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let tx">
+
+  <!-- NORMAL MODE -->
+  <ng-container *ngIf="editingId !== tx.id">
+    <button mat-icon-button color="primary" (click)="startEdit(tx)">
+      ✏️
+    </button>
+
+    <button mat-icon-button color="warn" (click)="deleteTransaction(tx.id)">
+      🗑
+    </button>
+  </ng-container>
+
+  <!-- EDIT MODE -->
+  <ng-container *ngIf="editingId === tx.id">
+    <button mat-icon-button color="primary" (click)="saveEdit()">
+      💾
+    </button>
+
+    <button mat-icon-button color="warn" (click)="cancelEdit()">
+      ❌
+    </button>
+  </ng-container>
+
+</td>
+
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+</table>
+
+<!-- PAGINATOR -->
+<mat-paginator
+  [length]="totalItems"
+  [pageSize]="pageSize"
+  [pageIndex]="pageIndex"
+  (page)="onPageChange($event)">
+</mat-paginator>

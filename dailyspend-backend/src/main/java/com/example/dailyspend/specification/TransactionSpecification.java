@@ -8,78 +8,47 @@ import java.time.LocalDate;
 
 public class TransactionSpecification {
 
-    private TransactionSpecification() {
+    private TransactionSpecification() {}
+
+    public static Specification<Transaction> hasUser(Long userId) {
+        return (root, query, cb) ->
+                cb.equal(root.get("user").get("id"), userId);
     }
 
-    private static Specification<Transaction> notDeleted() {
+    public static Specification<Transaction> isNotDeleted() {
         return (root, query, cb) ->
                 cb.isFalse(root.get("deleted"));
     }
 
     public static Specification<Transaction> hasAccount(Long accountId) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.equal(root.get("account").get("id"), accountId)
-                );
-    }
-
-    public static Specification<Transaction> hasCategory(Long categoryId) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.equal(root.get("category").get("id"), categoryId)
-                );
+        if (accountId == null) return null;
+        return (root, query, cb) ->
+                cb.equal(root.get("account").get("id"), accountId);
     }
 
     public static Specification<Transaction> hasPerson(Long personId) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.equal(root.get("person").get("id"), personId)
-                );
+        if (personId == null) return null;
+        return (root, query, cb) ->
+                cb.equal(root.get("person").get("id"), personId);
     }
 
     public static Specification<Transaction> hasType(TransactionType type) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.equal(root.get("type"), type)
-                );
-    }
-
-    public static Specification<Transaction> fromDate(LocalDate fromDate) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.greaterThanOrEqualTo(
-                                root.get("transactionDate"), fromDate
-                        )
-                );
-    }
-
-    public static Specification<Transaction> toDate(LocalDate toDate) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.lessThanOrEqualTo(
-                                root.get("transactionDate"), toDate
-                        )
-                );
+        if (type == null) return null;
+        return (root, query, cb) ->
+                cb.equal(root.get("type"), type);
     }
 
     public static Specification<Transaction> betweenDates(
             LocalDate fromDate,
             LocalDate toDate
     ) {
-        return Specification
-                .where(notDeleted())
-                .and((root, query, cb) ->
-                        cb.between(
-                                root.get("transactionDate"),
-                                fromDate,
-                                toDate
-                        )
+        if (fromDate == null || toDate == null) return null;
+
+        return (root, query, cb) ->
+                cb.between(
+                        root.get("transactionDate"),
+                        fromDate,
+                        toDate
                 );
     }
 }

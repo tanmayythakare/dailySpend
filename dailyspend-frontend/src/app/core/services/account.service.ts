@@ -17,4 +17,8 @@ export class AccountService {
   create(account: { name: string; type: string; balance?: number }) {
     return this.api.post('/v1/accounts', account);
   }
+  delete(id: number) {
+  return this.api.delete(`/v1/accounts/${id}`);
+}
+
 }

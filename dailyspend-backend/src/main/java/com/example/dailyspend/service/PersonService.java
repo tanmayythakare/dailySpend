@@ -120,22 +120,38 @@ public class PersonService {
                 .toList();
     }
 
-    private TransactionResponse toTransactionResponse(Transaction tx) {
-        TransactionResponse response = new TransactionResponse();
-        response.setId(tx.getId());
-        response.setAmount(tx.getAmount());
-        response.setTransactionDate(tx.getTransactionDate());
-        response.setDescription(tx.getDescription());
-        response.setAccountName(tx.getAccount().getName());
+   private TransactionResponse toTransactionResponse(Transaction tx) {
 
-        if (tx.getCategory() != null) {
-            response.setCategoryName(tx.getCategory().getName());
-        }
+    TransactionResponse response = new TransactionResponse();
 
-        if (tx.getPerson() != null) {
-            response.setPersonName(tx.getPerson().getName());
-        }
+    response.setId(tx.getId());
+    response.setAmount(tx.getAmount());
+    response.setType(tx.getType());
+    response.setDescription(tx.getDescription());
+    response.setTransactionDate(tx.getTransactionDate());
 
-        return response;
+    if (tx.getAccount() != null) {
+        response.setAccount(new TransactionResponse.AccountInfo(
+                tx.getAccount().getId(),
+                tx.getAccount().getName()
+        ));
     }
+
+    if (tx.getCategory() != null) {
+        response.setCategory(new TransactionResponse.CategoryInfo(
+                tx.getCategory().getId(),
+                tx.getCategory().getName()
+        ));
+    }
+
+    if (tx.getPerson() != null) {
+        response.setPerson(new TransactionResponse.PersonInfo(
+                tx.getPerson().getId(),
+                tx.getPerson().getName()
+        ));
+    }
+
+    return response;
+}
+
 }

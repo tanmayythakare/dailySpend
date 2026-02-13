@@ -1,0 +1,42 @@
+<h2>People</h2>
+
+<div class="actions">
+  <button (click)="startAdd()" *ngIf="!adding">
+    + Add Person
+  </button>
+</div>
+
+<!-- ADD PERSON FORM -->
+<div *ngIf="adding" class="add-box">
+  <input [(ngModel)]="newPersonName" placeholder="Person name">
+  <button (click)="savePerson()">Save</button>
+  <button (click)="cancelAdd()">Cancel</button>
+</div>
+
+<!-- LOADING -->
+<div *ngIf="loading">
+  Loading people...
+</div>
+
+<!-- EMPTY -->
+<div *ngIf="!loading && people.length === 0">
+  No people yet
+</div>
+
+<!-- PEOPLE LIST -->
+<div *ngIf="!loading && people.length > 0" class="people-list">
+
+  <div class="person-card"
+       *ngFor="let p of people"
+       (click)="openPerson(p)">
+
+    <div class="name">
+      {{ p.name }}
+    </div>
+
+    <div class="balance">
+    </div>
+
+  </div>
+
+</div>
