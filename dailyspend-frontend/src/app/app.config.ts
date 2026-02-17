@@ -11,6 +11,7 @@ import { LoadingInterceptor } from './core/interceptors/loading.interceptor';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -43,6 +44,6 @@ export const MY_DATE_FORMATS = {
       provide: HTTP_INTERCEPTORS,
       useClass: LoadingInterceptor,
       multi: true
-    }
+    }, provideAnimationsAsync(), provideAnimationsAsync()
   ]
 };

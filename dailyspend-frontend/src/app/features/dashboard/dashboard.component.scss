@@ -1,107 +1,104 @@
 /* ═══════════════════════════════════════════════════════════════
-   Dashboard — targets existing HTML class names exactly
+   Dashboard
 ═══════════════════════════════════════════════════════════════ */
 
 .dashboard-container {
   max-width: 100%;
-  animation: pageFadeIn 250ms ease both;
+  animation: pageFadeIn 220ms ease both;
 }
 
 @keyframes pageFadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Page Title ───────────────────────────────────────────────── */
 .page-title {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 500;
   color: var(--gray-900);
-  letter-spacing: -0.4px;
-  margin-bottom: 24px;
+  letter-spacing: -0.3px;
+  margin-bottom: 20px;
 }
 
 /* ── Messages ─────────────────────────────────────────────────── */
 .messages {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 
   .success {
     background: var(--positive-bg);
     color: var(--positive-text);
-    border: 1px solid rgba(16,185,129,0.25);
+    border: 1px solid rgba(45,168,131,0.18);
     border-radius: 10px;
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 400;
     margin-bottom: 8px;
   }
 
   .error {
     background: var(--negative-bg);
     color: var(--negative-text);
-    border: 1px solid rgba(239,68,68,0.25);
+    border: 1px solid rgba(224,82,82,0.18);
     border-radius: 10px;
-    padding: 12px 16px;
+    padding: 10px 14px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 400;
     margin-bottom: 8px;
   }
 }
 
 /* ── Net Worth Card ───────────────────────────────────────────── */
-/* Moved to TOP visually via order — we style it as the hero card */
 .net-worth-card {
   background: var(--brand-gradient);
-  border-radius: 20px;
-  padding: 24px 32px;
+  border-radius: 18px;
+  padding: 22px 28px;
   color: #fff;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 32px rgba(124,58,237,0.30), 0 2px 8px rgba(124,58,237,0.20);
+  margin-bottom: 20px;
+  box-shadow: 0 4px 24px rgba(110,85,232,0.22), 0 1px 4px rgba(110,85,232,0.14);
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  order: -1; /* visually first if in flex */
 
-  /* Decorative blobs */
   &::after {
     content: '';
     position: absolute;
-    right: -50px;
+    right: -40px;
     top: -50px;
-    width: 180px;
-    height: 180px;
+    width: 160px;
+    height: 160px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.07);
     pointer-events: none;
   }
   &::before {
     content: '';
     position: absolute;
-    right: 30px;
-    bottom: -40px;
-    width: 110px;
-    height: 110px;
+    right: 40px;
+    bottom: -35px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: rgba(255,255,255,0.05);
     pointer-events: none;
   }
 
   h2 {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
-    opacity: 0.85;
+    letter-spacing: 1px;
+    opacity: 0.72;
     color: #fff;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
   h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -1.2px;
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -1px;
     color: #fff;
     font-family: var(--font-mono);
     line-height: 1;
@@ -112,17 +109,17 @@
 .create-account-card {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
 
   h2 {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin-bottom: 16px;
-    letter-spacing: -0.2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 14px;
+    letter-spacing: -0.1px;
   }
 }
 
@@ -130,23 +127,20 @@
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 12px;
+  gap: 10px;
   align-items: end;
 
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr 1fr;
-  }
-  @media (max-width: 560px) {
-    grid-template-columns: 1fr;
-  }
+  @media (max-width: 900px) { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
 
   input, select {
-    height: 38px;
+    height: 36px;
     padding: 0 12px;
-    border: 1.5px solid var(--gray-200);
-    border-radius: 10px;
+    border: 1px solid var(--gray-200);
+    border-radius: 9px;
     font-family: var(--font-sans);
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 400;
     color: var(--gray-800);
     background: #fff;
     outline: none;
@@ -155,7 +149,7 @@
 
     &:focus {
       border-color: var(--brand-400);
-      box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+      box-shadow: 0 0 0 3px rgba(110,85,232,0.1);
     }
 
     &::placeholder { color: var(--gray-400); }
@@ -163,36 +157,36 @@
 
   select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%23ABA89F' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
+    background-position: right 11px center;
+    padding-right: 32px;
     cursor: pointer;
   }
 
   button {
-    height: 38px;
-    padding: 0 20px;
+    height: 36px;
+    padding: 0 18px;
     background: var(--brand-600);
     color: #fff;
     border: none;
-    border-radius: 10px;
+    border-radius: 9px;
     font-family: var(--font-sans);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(124,58,237,0.30);
-    transition: all 200ms ease;
+    box-shadow: 0 2px 8px rgba(110,85,232,0.22);
+    transition: all 180ms ease;
 
     &:hover:not(:disabled) {
       background: var(--brand-700);
-      box-shadow: 0 4px 14px rgba(124,58,237,0.40);
+      box-shadow: 0 3px 12px rgba(110,85,232,0.32);
       transform: translateY(-1px);
     }
 
     &:disabled {
-      opacity: 0.55;
+      opacity: 0.5;
       cursor: not-allowed;
       transform: none;
     }
@@ -202,20 +196,20 @@
 /* ── Accounts Grid ────────────────────────────────────────────── */
 .accounts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
 }
 
 /* ── Account Card ─────────────────────────────────────────────── */
 .account-card {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
-  padding: 20px;
+  padding: 18px 20px;
   transition: box-shadow 200ms ease, transform 200ms ease;
-  animation: cardIn 300ms ease both;
+  animation: cardIn 280ms ease both;
 
   &:hover {
     box-shadow: var(--shadow-md);
@@ -223,12 +217,12 @@
   }
 
   @for $i from 1 through 8 {
-    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 60}ms; }
+    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 50}ms; }
   }
 
   h3 {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--gray-900);
     margin-bottom: 12px;
     white-space: nowrap;
@@ -241,36 +235,35 @@
     justify-content: space-between;
     align-items: center;
     font-size: 13px;
-    margin-bottom: 8px;
+    margin-bottom: 7px;
 
-    span {
-      color: var(--gray-500);
-    }
+    span { color: var(--gray-400); font-size: 12px; }
 
     strong {
-      font-weight: 600;
-      color: var(--gray-800);
+      font-weight: 500;
+      color: var(--gray-700);
       font-family: var(--font-mono);
+      font-size: 13px;
     }
   }
 
   button {
     width: 100%;
-    margin-top: 16px;
-    padding: 8px;
+    margin-top: 14px;
+    padding: 7px;
     background: #fff;
     color: var(--negative);
-    border: 1.5px solid var(--gray-200);
+    border: 1px solid var(--gray-200);
     border-radius: 8px;
     font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 400;
     cursor: pointer;
-    transition: all 200ms ease;
+    transition: all 150ms ease;
 
     &:hover {
       background: var(--negative-bg);
-      border-color: var(--negative);
+      border-color: rgba(224,82,82,0.3);
     }
   }
 }
@@ -286,14 +279,14 @@
   align-items: center;
   justify-content: center;
   padding: 48px;
-  color: var(--gray-500);
-  font-size: 14px;
+  color: var(--gray-400);
+  font-size: 13px;
 }
 
 .empty {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid var(--gray-200);
   padding: 48px 24px;
   text-align: center;
   margin-top: 8px;

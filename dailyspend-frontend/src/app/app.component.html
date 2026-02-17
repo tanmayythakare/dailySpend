@@ -1,7 +1,15 @@
-<div class="global-loader" *ngIf="loading$ | async">
-  <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-</div>
+<div class="app-layout">
 
-<div [@routeFade]="o.isActivated ? o.activatedRoute : ''">
-  <router-outlet #o="outlet"></router-outlet>
+  <aside class="sidebar">
+    <h2>DailySpend</h2>
+
+    <a routerLink="/dashboard">Dashboard</a>
+    <a routerLink="/transactions">Transactions</a>
+    <a routerLink="/reports">Reports</a>
+  </aside>
+
+  <main class="content">
+    <router-outlet></router-outlet>
+  </main>
+
 </div>

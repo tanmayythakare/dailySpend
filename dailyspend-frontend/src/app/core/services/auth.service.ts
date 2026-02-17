@@ -19,12 +19,13 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(
-      `${environment.apiBaseUrl}/auth/register`,
-      request
-    );
-  }
+ register(request: RegisterRequest): Observable<void> {
+  return this.http.post<void>(
+    `${environment.apiBaseUrl}/auth/register`,
+    request
+  );
+}
+
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(

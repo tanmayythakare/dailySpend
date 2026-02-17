@@ -22,9 +22,14 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/login")
+   @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        String token = authService.login(request);
-        return ResponseEntity.ok(new AuthResponse(token));
-    }
+
+    String token = authService.login(request);
+
+    return ResponseEntity.ok(
+        new AuthResponse(token, request.getUsername())
+    );
+}
+
 }

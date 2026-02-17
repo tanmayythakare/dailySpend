@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountService } from '../../core/services/account.service';
 import { Account } from '../../models/account.model';
-
+import { AnalyticsService } from '../../core/services/analytics.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -25,6 +25,9 @@ export class DashboardComponent implements OnInit {
   newAccountName = '';
   newAccountBalance = 0;
   newAccountType = '';
+  income = 0;
+  expense = 0;
+  net = 0;
 
   accountTypes = ['CASH', 'BANK', 'CREDIT', 'WALLET'];
 
@@ -32,11 +35,13 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private accountService: AccountService,
-    private router: Router
+    private router: Router,
+    private analytics: AnalyticsService
   ) {}
 
   ngOnInit(): void {
     this.loadAccounts();
+    this.loadSummary();
   }
 
   loadAccounts(): void {
@@ -56,6 +61,11 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+  loadSummary() {
+this.analytics.getIncome().subscribe(v => this.income = v);
+this.analytics.getExpense().subscribe(v => this.expense = v);
+this.analytics.getNet().subscribe(v => this.net = v);
+}
 
   calculateTotalBalance(): void {
     this.totalBalance = this.accounts.reduce((sum: number, account: Account) => {

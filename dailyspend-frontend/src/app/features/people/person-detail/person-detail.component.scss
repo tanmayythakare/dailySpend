@@ -1,155 +1,29 @@
-/* ═══════════════════════════════════════════════════════════════════
-   Person Detail / Ledger Component
-═══════════════════════════════════════════════════════════════════ */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
 
-.person-detail {
+.sidebar {
+  width: 240px;
+  background: #111827;
+  color: white;
+  padding: 20px;
+}
 
-  /* ── Back + Title ─────────────────────────────────────────────── */
-  &__header {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-    margin-bottom: var(--space-6);
-  }
+.sidebar a {
+  display: block;
+  color: #9ca3af;
+  margin: 10px 0;
+  text-decoration: none;
+}
 
-  &__back-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: 14px;
-    color: var(--gray-500);
-    text-decoration: none;
-    cursor: pointer;
-    background: none;
-    border: none;
-    font-family: var(--font-sans);
-    padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
+.sidebar a:hover {
+  color: white;
+}
 
-    &:hover {
-      background: var(--gray-100);
-      color: var(--gray-800);
-    }
-
-    svg { width: 16px; height: 16px; }
-  }
-
-  /* ── Person Summary Card ──────────────────────────────────────── */
-  &__summary-card {
-    background: var(--surface-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-6);
-    display: flex;
-    align-items: center;
-    gap: var(--space-5);
-    margin-bottom: var(--space-5);
-  }
-
-  &__avatar-lg {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background: var(--brand-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 22px;
-    font-weight: 700;
-    flex-shrink: 0;
-    box-shadow: 0 4px 16px rgba(124,58,237,0.30);
-  }
-
-  &__summary-info {
-    flex: 1;
-  }
-
-  &__person-name {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--gray-900);
-    margin-bottom: var(--space-1);
-  }
-
-  &__balance-summary {
-    font-size: 14px;
-    color: var(--gray-500);
-    margin-bottom: var(--space-1);
-  }
-
-  &__balance-amount-lg {
-    font-size: 26px;
-    font-weight: 700;
-    font-family: var(--font-mono);
-    letter-spacing: -0.5px;
-
-    &--positive { color: var(--positive); }
-    &--negative { color: var(--negative); }
-    &--zero     { color: var(--gray-400); }
-  }
-
-  /* ── Ledger Table ─────────────────────────────────────────────── */
-  &__ledger-card {
-    background: var(--surface-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-  }
-
-  &__ledger-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--gray-100);
-
-    h3 {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--gray-800);
-    }
-  }
-
-  &__ledger-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-
-    th {
-      padding: 11px var(--space-5);
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--gray-500);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      background: var(--gray-50);
-      border-bottom: 1px solid var(--gray-200);
-
-      &:last-child { text-align: right; }
-    }
-
-    td {
-      padding: 13px var(--space-5);
-      border-bottom: 1px solid var(--gray-100);
-      color: var(--gray-700);
-      vertical-align: middle;
-
-      &:last-child {
-        text-align: right;
-        font-family: var(--font-mono);
-        font-weight: 600;
-      }
-    }
-
-    tbody tr {
-      transition: background var(--transition-fast);
-      &:hover { background: var(--gray-50); }
-      &:last-child td { border-bottom: none; }
-    }
-  }
+.content {
+  flex: 1;
+  padding: 24px;
+  background: #f3f4f6;
 }

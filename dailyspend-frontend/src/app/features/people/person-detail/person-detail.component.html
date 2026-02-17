@@ -1,4 +1,15 @@
 <div *ngIf="person">
+<div class="person-detail">
+  <h2>Person Details</h2>
+
+  <div *ngIf="loading">Loading...</div>
+
+  <ul *ngIf="!loading">
+    <li *ngFor="let tx of transactions">
+      {{ tx.description }} — ₹{{ tx.amount }}
+    </li>
+  </ul>
+</div>
 
   <h2>{{ person.name }}</h2>
 

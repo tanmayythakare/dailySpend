@@ -1,126 +1,85 @@
 <div class="reports-container">
 
-  <h1 class="page-title">Reports</h1>
+  <!-- Header Row with currency -->
+  <div class="reports-header">
+    <h1 class="page-title">Reports</h1>
+  </div>
 
-  <!-- Summary Cards -->
-  <div class="summary-grid">
+  <!-- Summary Cards Row -->
+  <div class="summary-row">
 
-    <div class="summary-card income">
-      <div class="summary-icon">📈</div>
-      <div class="summary-content">
-        <span class="summary-label">Total Income</span>
-        <span class="summary-value">{{ formatCurrency(summary.totalIncome) }}</span>
-        <span class="summary-hint">Money taken this month</span>
+    <div class="stat-card">
+      <div class="stat-icon income-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div class="stat-body">
+        <span class="stat-label">Total Income</span>
+        <span class="stat-value">{{ formatCurrency(summary.totalIncome) }}</span>
       </div>
     </div>
 
-    <div class="summary-card expense">
-      <div class="summary-icon">📉</div>
-      <div class="summary-content">
-        <span class="summary-label">Total Expenses</span>
-        <span class="summary-value">{{ formatCurrency(summary.totalExpenses) }}</span>
-        <span class="summary-hint">Spent this month</span>
+    <div class="stat-card">
+      <div class="stat-icon expense-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+      </div>
+      <div class="stat-body">
+        <span class="stat-label">Total Expenses</span>
+        <span class="stat-value">{{ formatCurrency(summary.totalExpenses) }}</span>
       </div>
     </div>
 
-    <div class="summary-card net">
-      <div class="summary-icon">💰</div>
-      <div class="summary-content">
-        <span class="summary-label">Net Flow</span>
-        <span class="summary-value"
-              [class.positive]="summary.netFlow > 0"
-              [class.negative]="summary.netFlow < 0">
+    <div class="stat-card">
+      <div class="stat-icon net-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+      </div>
+      <div class="stat-body">
+        <span class="stat-label">Net Flow</span>
+        <span class="stat-value" [class.positive]="summary.netFlow >= 0" [class.negative]="summary.netFlow < 0">
           {{ formatCurrency(summary.netFlow) }}
         </span>
-        <span class="summary-hint">Income minus expenses</span>
-      </div>
-    </div>
-
-    <div class="summary-card transactions">
-      <div class="summary-icon">🧾</div>
-      <div class="summary-content">
-        <span class="summary-label">Transactions</span>
-        <span class="summary-value">{{ summary.transactionCount }}</span>
-        <span class="summary-hint">This month</span>
       </div>
     </div>
 
   </div>
 
-  <!-- Charts Section -->
-  <div class="charts-grid">
+  <!-- Charts Row -->
+  <div class="charts-row">
 
-    <!-- Expense by Category -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Expenses by Category</h3>
-        <span class="chart-period">Last 30 days</span>
+    <!-- Spending Trend Line Chart -->
+    <div class="chart-card chart-card--wide">
+      <div class="chart-card-header">
+        <span class="chart-title">Spending Trend</span>
       </div>
-      <div class="chart-content" *ngIf="categoryData.length > 0">
-        <!-- Add your chart library here (Chart.js, ngx-charts, etc.) -->
-        <div class="placeholder-chart">
-          <div *ngFor="let item of categoryData" class="category-bar">
-            <span class="category-name">{{ item.category }}</span>
-            <div class="bar-wrapper">
-              <div class="bar" [style.width.%]="getBarWidth(item.amount)"></div>
-            </div>
-            <span class="category-amount">{{ formatCurrency(item.amount) }}</span>
-          </div>
-        </div>
+      <div class="chart-canvas-wrap">
+        <canvas id="trendChart"></canvas>
       </div>
-      <div class="empty-chart" *ngIf="categoryData.length === 0">
-        <p>No expense data available</p>
+      <div class="chart-legend">
+        <span class="legend-dot legend-income"></span><span class="legend-label">Income</span>
+        <span class="legend-dot legend-expense"></span><span class="legend-label">Expense</span>
       </div>
     </div>
 
-    <!-- Spending Trend -->
-    <div class="chart-card">
-      <div class="chart-header">
-        <h3>Spending Trend</h3>
-        <span class="chart-period">Last 7 days</span>
+    <!-- Expense Breakdown Donut -->
+    <div class="chart-card chart-card--donut">
+      <div class="chart-card-header">
+        <span class="chart-title">Expense Breakdown</span>
       </div>
-      <div class="chart-content" *ngIf="trendData.length > 0">
-        <div class="placeholder-chart">
-          <div *ngFor="let item of trendData" class="trend-item">
-            <span class="trend-date">{{ item.date | date: 'MMM d' }}</span>
-            <div class="trend-bar-wrapper">
-              <div class="trend-bar" [style.width.%]="getTrendBarWidth(item.amount)"></div>
-            </div>
-            <span class="trend-amount">{{ formatCurrency(item.amount) }}</span>
-          </div>
+      <div class="donut-wrap">
+        <canvas id="donutChart"></canvas>
+      </div>
+      <div class="donut-legend">
+        <div class="legend-item" *ngFor="let item of donutLegend">
+          <span class="legend-dot" [style.background]="item.color"></span>
+          <span class="legend-name">{{ item.label }}</span>
         </div>
-      </div>
-      <div class="empty-chart" *ngIf="trendData.length === 0">
-        <p>No trend data available</p>
       </div>
     </div>
 
   </div>
 
-  <!-- Top Categories -->
-  <div class="top-categories-card">
-    <h3>Top Spending Categories</h3>
-    
-    <div class="categories-list" *ngIf="topCategories.length > 0">
-      <div class="category-item" *ngFor="let cat of topCategories; let i = index">
-        <div class="category-rank">{{ i + 1 }}</div>
-        <div class="category-details">
-          <span class="category-name">{{ cat.name }}</span>
-          <span class="category-count">{{ cat.count }} transaction{{ cat.count === 1 ? '' : 's' }}</span>
-        </div>
-        <div class="category-amount">{{ formatCurrency(cat.amount) }}</div>
-      </div>
-    </div>
-
-    <div class="empty-list" *ngIf="topCategories.length === 0">
-      <p>Start spending to see your top categories</p>
-    </div>
-  </div>
-
-  <!-- Loading State -->
-  <div class="loading-state" *ngIf="loading">
+  <!-- Loading -->
+  <div class="loading-overlay" *ngIf="loading">
     <div class="spinner"></div>
-    <p>Loading reports...</p>
   </div>
 
 </div>
