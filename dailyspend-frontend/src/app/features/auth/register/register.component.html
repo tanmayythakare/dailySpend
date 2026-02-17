@@ -1,47 +1,83 @@
-<h2>Register</h2>
+<div class="register-container">
+  <div class="register-card">
 
-<form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- Header -->
+    <div class="register-header">
+      <div class="logo">₹</div>
+      <h1 class="register-title">Create your account</h1>
+      <p class="register-subtitle">Start tracking your finances today</p>
+    </div>
 
-  <input
-    type="text"
-    formControlName="username"
-    placeholder="Username"
-  />
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
 
-  <input
-    type="email"
-    formControlName="email"
-    placeholder="Email"
-  />
+    <!-- Success Message -->
+    <div class="success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
 
-  <input
-    type="password"
-    formControlName="password"
-    placeholder="Password"
-  />
+    <!-- Register Form -->
+    <form class="register-form" (ngSubmit)="onSubmit()">
 
-  <input
-    type="password"
-    formControlName="confirmPassword"
-    placeholder="Confirm Password"
-  />
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="registerData.username"
+          placeholder="Choose a username"
+          required
+          autocomplete="username"
+        />
+      </div>
 
-  <div
-    *ngIf="form.errors?.['passwordMismatch']"
-    style="color:red"
-  >
-    Passwords do not match
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          [(ngModel)]="registerData.email"
+          placeholder="your@email.com"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="registerData.password"
+          placeholder="Create a strong password"
+          required
+          autocomplete="new-password"
+        />
+        <small class="password-hint">
+          At least 8 characters with uppercase, lowercase, number, and special character
+        </small>
+      </div>
+
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Creating account...' : 'Create Account' }}
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="register-footer">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </div>
+
   </div>
-
-  <button
-    type="submit"
-    [disabled]="loading || form.invalid"
-  >
-    {{ loading ? 'Registering...' : 'Register' }}
-  </button>
-
-  <p *ngIf="error" style="color:red">
-    {{ error }}
-  </p>
-
-</form>
+</div>

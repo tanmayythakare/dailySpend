@@ -1,10 +1,11 @@
-import { Injectable, PLATFORM_ID, Inject } from '@angular/core';
+import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, RegisterRequest, AuthResponse }from '../../models/auth.model';
+import { LoginRequest, RegisterRequest, AuthResponse } from '../../models/auth.model';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -30,36 +31,34 @@ export class AuthService {
       `${environment.apiBaseUrl}/auth/login`,
       request
     ).pipe(
-      tap(response => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-        }
-      })
+      tap(response => this.storeToken(response.token))
     );
   }
 
   logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.TOKEN_KEY);
-    }
+    this.clearToken();
     this.router.navigate(['/login']);
   }
 
   getToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem(this.TOKEN_KEY);
-    }
-    return null;
+    return isPlatformBrowser(this.platformId)
+      ? localStorage.getItem(this.TOKEN_KEY)
+      : null;
   }
+
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
-  private handleAuthResponse(response: AuthResponse): void {
-  console.log("NEW TOKEN RECEIVED:", response.token);
 
-  if (isPlatformBrowser(this.platformId)) {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
+  private storeToken(token: string): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(this.TOKEN_KEY, token);
+    }
   }
-}
 
+  private clearToken(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.TOKEN_KEY);
+    }
+  }
 }

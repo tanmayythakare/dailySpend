@@ -1,81 +1,80 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {
-  FormBuilder,
-  Validators,
-  ReactiveFormsModule,
-  AbstractControl,
-  ValidationErrors
-} from '@angular/forms';
-import { Router } from '@angular/router';
-
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { RegisterRequest } from '../../../models/auth.model';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent {
 
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  registerData = {
+    username: '',
+    email: '',
+    password: ''
+  };
 
   loading = false;
-  error: string | null = null;
+  errorMessage = '';
+  successMessage = '';
 
-  form = this.fb.group(
-    {
-      username: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', Validators.required]
-    },
-    { validators: this.passwordMatchValidator }
-  );
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  // 🔐 Password match validator
-  passwordMatchValidator(
-    control: AbstractControl
-  ): ValidationErrors | null {
+  onSubmit(): void {
+    // Validation
+    if (!this.registerData.username || !this.registerData.email || !this.registerData.password) {
+      this.errorMessage = 'Please fill in all fields';
+      return;
+    }
 
-    const password = control.get('password')?.value;
-    const confirmPassword = control.get('confirmPassword')?.value;
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.registerData.email)) {
+      this.errorMessage = 'Please enter a valid email address';
+      return;
+    }
 
-    return password === confirmPassword
-      ? null
-      : { passwordMismatch: true };
-  }
-
-  onSubmit() {
-
-    // UX guard (NOT security)
-    if (this.form.invalid) return;
+    // Password validation
+    if (this.registerData.password.length < 8) {
+      this.errorMessage = 'Password must be at least 8 characters long';
+      return;
+    }
 
     this.loading = true;
-    this.error = null;
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    const formValue = this.form.value;
-
-    const request: RegisterRequest = {
-      username: formValue.username!,
-      email: formValue.email!,
-      password: formValue.password!
-    };
-
-    this.authService.register(request).subscribe({
-      next: () => {
-        this.loading = false;
-        this.router.navigate(['/login']);
+    this.authService.register(this.registerData).subscribe({
+      next: (response) => {
+        this.successMessage = 'Account created successfully! Redirecting to login...';
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          this.router.navigate(['/login']);
+        }, 2000);
       },
-      error: (err) => {
+      error: (error) => {
+        console.error('Registration error:', error);
+        
+        if (error.status === 409) {
+          this.errorMessage = 'Username or email already exists';
+        } else if (error.status === 400) {
+          this.errorMessage = error.error?.message || 'Invalid registration data';
+        } else if (error.status === 0) {
+          this.errorMessage = 'Cannot connect to server. Please check your connection.';
+        } else {
+          this.errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        }
+        
         this.loading = false;
-        this.error = err?.error?.message || 'Registration failed';
-        console.error('Register error:', err);
       }
     });
   }

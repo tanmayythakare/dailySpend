@@ -1,16 +1,61 @@
 <div class="login-container">
-  <h2>Login</h2>
+  <div class="login-card">
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <!-- Header -->
+    <div class="login-header">
+      <div class="logo">₹</div>
+      <h1 class="login-title">Welcome back</h1>
+      <p class="login-subtitle">Sign in to continue to DailySpend</p>
+    </div>
 
-    <input type="text" formControlName="username" placeholder="Username" />
-    <input type="password" formControlName="password" placeholder="Password" />
+    <!-- Error Message -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
 
-    <button type="submit" [disabled]="loading">
-      {{ loading ? 'Logging in...' : 'Login' }}
-    </button>
+    <!-- Login Form -->
+    <form class="login-form" (ngSubmit)="onSubmit()">
 
-    <p *ngIf="error" style="color:red">{{ error }}</p>
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          [(ngModel)]="credentials.username"
+          placeholder="Enter your username"
+          required
+          autocomplete="username"
+        />
+      </div>
 
-  </form>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          [(ngModel)]="credentials.password"
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Signing in...' : 'Sign In' }}
+      </button>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="login-footer">
+      Don't have an account?
+      <a routerLink="/register">Create one</a>
+    </div>
+  </div>
 </div>

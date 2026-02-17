@@ -1,57 +1,86 @@
-<h1>Dashboard</h1>
+<div class="dashboard-container">
 
-<div class="messages">
-  <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
-  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-</div>
+  <h1 class="page-title">Dashboard</h1>
 
-<h2>Create Account</h2>
-
-<div class="form-container">
-  <input
-    type="text"
-    placeholder="Account Name"
-    [(ngModel)]="newAccountName"
-  />
-
-  <input
-    type="number"
-    placeholder="Initial Balance"
-    [(ngModel)]="newAccountBalance"
-  />
-
-  <select [(ngModel)]="newAccountType">
-    <option value="" disabled>Select account type</option>
-    <option *ngFor="let type of accountTypes" [value]="type">
-      {{ type }}
-    </option>
-  </select>
-
-  <button (click)="createAccount()" [disabled]="creating">
-    {{ creating ? 'Creating...' : 'Create Account' }}
-  </button>
-</div>
-
-<hr />
-
-<div *ngIf="loading">Loading accounts...</div>
-
-<div class="accounts-grid" *ngIf="!loading && accounts.length > 0">
-  <div class="account-card" *ngFor="let account of accounts">
-    <h3>{{ account.name }}</h3>
-    <p><strong>Type:</strong> {{ account.type }}</p>
-    <p><strong>Balance:</strong> {{ formatCurrency(account.balance) }}</p>
-
-    <button class="delete-btn" (click)="deleteAccount(account.id!)">
-      Delete
-    </button>
+  <!-- Messages -->
+  <div class="messages" *ngIf="successMessage || errorMessage">
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
   </div>
+
+  <!-- Create Account Section -->
+  <div class="create-account-card">
+    <h2>Create New Account</h2>
+
+    <div class="form-grid">
+      <input
+        type="text"
+        placeholder="Account name"
+        [(ngModel)]="newAccountName"
+      />
+
+      <input
+        type="number"
+        placeholder="Initial balance"
+        [(ngModel)]="newAccountBalance"
+      />
+
+      <select [(ngModel)]="newAccountType">
+        <option value="" disabled selected>Select type</option>
+        <option *ngFor="let type of accountTypes" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+
+      <button
+        (click)="createAccount()"
+        [disabled]="creating"
+      >
+        {{ creating ? 'Creating...' : 'Create Account' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    Loading your accounts...
+  </div>
+
+  <!-- Accounts Grid -->
+  <div class="accounts-grid" *ngIf="!loading && accounts.length > 0">
+    <div class="account-card" *ngFor="let account of accounts">
+      <h3>{{ account.name }}</h3>
+
+      <p>
+        <span>Type</span>
+        <strong>{{ account.type }}</strong>
+      </p>
+
+      <p>
+        <span>Balance</span>
+        <strong>{{ formatCurrency(account.balance) }}</strong>
+      </p>
+
+      <button (click)="deleteAccount(account.id!)">
+        Delete Account
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && accounts.length === 0" class="empty">
+    <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;">💳</div>
+    <div style="font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px;">
+      No accounts yet
+    </div>
+    <div style="font-size: 14px; color: var(--text-tertiary);">
+      Create your first account to start tracking your finances
+    </div>
+  </div>
+  <!-- Net Worth Card -->
+  <div class="net-worth-card">
+    <h2>Total Net Worth</h2>
+    <h1>{{ formatCurrency(totalBalance) }}</h1>
+  </div>
+
 </div>
-
-<div *ngIf="!loading && accounts.length === 0">
-  No accounts found.
-</div>
-
-<hr />
-
-<h2>Total Net Worth: {{ formatCurrency(totalBalance) }}</h2>

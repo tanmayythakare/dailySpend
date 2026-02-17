@@ -24,6 +24,7 @@ public class TransactionService {
     private final CategoryRepository categoryRepository;
     private final PersonRepository personRepository;
     private final SecurityUtils securityUtils;
+
     public TransactionService(
             TransactionRepository transactionRepository,
             AccountRepository accountRepository,
@@ -37,8 +38,6 @@ public class TransactionService {
         this.personRepository = personRepository;
         this.securityUtils = securityUtils;
     }
-
-    // ================= LEGACY (CONTROLLER EXPECTS THIS) =================
 
     @Transactional
     public Transaction createTransaction(TransactionRequest request) {
@@ -58,198 +57,174 @@ public class TransactionService {
         return transactionRepository.findById(id);
     }
 
-    // ================= SEMANTIC APIs =================
+    @Transactional
+    public Transaction createExpense(ExpenseRequestDto request) {
+
+        Transaction tx = createBaseTransaction(
+                request.getAccountId(),
+                request.getCategoryId(),
+                request.getPersonId(),
+                request.getDescription(),
+                request.getTransactionDate()
+        );
+
+        tx.setAmount(request.getAmount());
+        tx.setType(TransactionType.EXPENSE);
+        applyBalanceEffect(tx, true);
+
+        return transactionRepository.save(tx);
+    }
 
     @Transactional
-public Transaction createExpense(ExpenseRequestDto request) {
+    public Transaction createMoneyGiven(MoneyGivenRequestDto request) {
 
-    Transaction tx = createBaseTransaction(
-            request.getAccountId(),
-            request.getCategoryId(),
-            request.getPersonId(),
-            request.getDescription(),
-            request.getTransactionDate()
-    );
+        Transaction tx = createBaseTransaction(
+                request.getAccountId(),
+                null,
+                request.getPersonId(),
+                request.getDescription(),
+                request.getTransactionDate()
+        );
 
-    // ✅ REQUIRED — set amount
-    tx.setAmount(request.getAmount());
+        tx.setAmount(request.getAmount());
+        tx.setType(TransactionType.MONEY_GIVEN);
+        applyBalanceEffect(tx, true);
 
-    tx.setType(TransactionType.EXPENSE);
-
-    applyBalanceEffect(tx, true);
-
-    return transactionRepository.save(tx);
-}
+        return transactionRepository.save(tx);
+    }
 
     @Transactional
-public Transaction createMoneyGiven(MoneyGivenRequestDto request) {
+    public Transaction createMoneyTaken(MoneyTakenRequestDto request) {
 
-    Transaction tx = createBaseTransaction(
-            request.getAccountId(),
-            null,
-            request.getPersonId(),
-            request.getDescription(),
-            request.getTransactionDate()
-    );
+        Transaction tx = createBaseTransaction(
+                request.getAccountId(),
+                null,
+                request.getPersonId(),
+                request.getDescription(),
+                request.getTransactionDate()
+        );
 
-    tx.setAmount(request.getAmount());
-    tx.setType(TransactionType.MONEY_GIVEN);
+        tx.setAmount(request.getAmount());
+        tx.setType(TransactionType.MONEY_TAKEN);
+        applyBalanceEffect(tx, true);
 
-    applyBalanceEffect(tx, true);
-
-    return transactionRepository.save(tx);
-}
+        return transactionRepository.save(tx);
+    }
 
     @Transactional
-public Transaction createMoneyTaken(MoneyTakenRequestDto request) {
+    public Transaction updateTransaction(Long transactionId, TransactionUpdateRequest request) {
 
-    Transaction tx = createBaseTransaction(
-            request.getAccountId(),
-            null,
-            request.getPersonId(),
-            request.getDescription(),
-            request.getTransactionDate()
-    );
+        Long userId = securityUtils.getCurrentUserId();
 
-    tx.setAmount(request.getAmount());
-    tx.setType(TransactionType.MONEY_TAKEN);
+        Transaction existing = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
-    applyBalanceEffect(tx, true);
+        if (!existing.getUser().getId().equals(userId)) {
+            throw new RuntimeException("Unauthorized");
+        }
 
-    return transactionRepository.save(tx);
-}
+        if (request.getAmount() != null) {
+            existing.setAmount(request.getAmount());
+        }
 
-    // ================= UPDATE =================
+        if (request.getType() != null) {
+            existing.setType(request.getType());
+        }
+
+        if (request.getDescription() != null) {
+            existing.setDescription(request.getDescription());
+        }
+        if (request.getTransactionDate() != null) {
+            existing.setTransactionDate(request.getTransactionDate());
+        }
+
+        if (request.getAccountId() != null) {
+            Account account = accountRepository.findById(request.getAccountId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+            existing.setAccount(account);
+        }
+
+        if (request.getCategoryId() != null) {
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+            existing.setCategory(category);
+        } else {
+            existing.setCategory(null);
+        }
+
+        if (request.getPersonId() != null) {
+            Person person = personRepository.findById(request.getPersonId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
+            existing.setPerson(person);
+        } else {
+            existing.setPerson(null);
+        }
+
+        return transactionRepository.save(existing);
+    }
 
     @Transactional
-public Transaction updateTransaction(Long transactionId, TransactionUpdateRequest request) {
+    public void deleteTransaction(Long transactionId) {
 
-    Long userId = securityUtils.getCurrentUserId();
+        Transaction tx = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
 
-    Transaction existing = transactionRepository.findById(transactionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
+        if (tx.isDeleted()) return;
 
-    // User isolation check
-    if (!existing.getUser().getId().equals(userId)) {
-        throw new RuntimeException("Unauthorized");
+        applyBalanceEffect(tx, false);
+        tx.setDeleted(true);
+        transactionRepository.save(tx);
     }
 
-    // Basic fields
-    if (request.getAmount() != null) {
-        existing.setAmount(request.getAmount());
-    }
-
-    if (request.getType() != null) {
-        existing.setType(request.getType());
-    }
-
-    if (request.getDescription() != null) {
-        existing.setDescription(request.getDescription());
-    }
-
-    if (request.getTransactionDate() != null) {
-        existing.setTransactionDate(request.getTransactionDate());
-    }
-
-    // Account
-    if (request.getAccountId() != null) {
-        Account account = accountRepository.findById(request.getAccountId())
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
-        existing.setAccount(account);
-    }
-
-    // Category
-    if (request.getCategoryId() != null) {
-        Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
-        existing.setCategory(category);
-    } else {
-        existing.setCategory(null);
-    }
-
-    // Person
-    if (request.getPersonId() != null) {
-        Person person = personRepository.findById(request.getPersonId())
-                .orElseThrow(() -> new ResourceNotFoundException("Person not found"));
-        existing.setPerson(person);
-    } else {
-        existing.setPerson(null);
-    }
-
-    return transactionRepository.save(existing);
-}
-
-
-    // ================= DELETE (THIS WAS MISSING) =================
-
-    @Transactional
-public void deleteTransaction(Long transactionId) {
-
-    Transaction tx = transactionRepository.findById(transactionId)
-            .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
-
-    if (tx.isDeleted()) return;
-    // 🔄 Reverse balance effect
-    applyBalanceEffect(tx, false);
-    tx.setDeleted(true);
-    transactionRepository.save(tx);
-}
-
-
-    // ================= FILTER =================
-
+    @Transactional(readOnly = true)
     public Page<Transaction> filterTransactions(TransactionFilterDto filter, Pageable pageable) {
 
-    Long userId = securityUtils.getCurrentUserId();
+        Long userId = securityUtils.getCurrentUserId();
 
-    Specification<Transaction> spec =
-            Specification.where(TransactionSpecification.hasUser(userId))
-                    .and(TransactionSpecification.isNotDeleted())
-                    .and(TransactionSpecification.hasAccount(filter.getAccountId()))
-                    .and(TransactionSpecification.hasType(filter.getType()))
-                    .and(TransactionSpecification.hasPerson(filter.getPersonId()))
-                    .and(TransactionSpecification.betweenDates(
-                            filter.getStartDate(),
-                            filter.getEndDate()
-                    ));
+        Specification<Transaction> spec =
+                Specification.where(TransactionSpecification.hasUser(userId))
+                        .and(TransactionSpecification.isNotDeleted())
+                        .and(TransactionSpecification.hasAccount(filter.getAccountId()))
+                        .and(TransactionSpecification.hasType(filter.getType()))
+                        .and(TransactionSpecification.hasPerson(filter.getPersonId()))
+                        .and(TransactionSpecification.betweenDates(
+                                filter.getStartDate(),
+                                filter.getEndDate()
+                        ));
 
-    return transactionRepository.findAll(spec, pageable);
-}
-
-
-    // ================= HELPERS =================
+        return transactionRepository.findAll(spec, pageable);
+    }
 
     private void applyBalanceEffect(Transaction tx, boolean apply) {
 
-    Account account = tx.getAccount();
-    BigDecimal amount = tx.getAmount();
+        Account account = tx.getAccount();
+        BigDecimal amount = tx.getAmount();
 
-    if (account == null || amount == null) {
-        throw new IllegalStateException("Account or amount cannot be null");
+        if (account == null || amount == null) {
+            throw new IllegalStateException("Account or amount cannot be null");
+        }
+
+        if (!apply) {
+            amount = amount.negate();
+        }
+
+        switch (tx.getType()) {
+
+            case EXPENSE:
+            case MONEY_GIVEN:
+                account.setBalance(account.getBalance().subtract(amount));
+                break;
+
+            case MONEY_TAKEN:
+                account.setBalance(account.getBalance().add(amount));
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown transaction type");
+        }
+
+        accountRepository.save(account);
     }
-
-    // Reverse effect if deleting
-    if (!apply) {
-        amount = amount.negate();
-    }
-
-    switch (tx.getType()) {
-
-        case EXPENSE:
-        case MONEY_GIVEN:
-            account.setBalance(account.getBalance().subtract(amount));
-            break;
-
-        case MONEY_TAKEN:
-            account.setBalance(account.getBalance().add(amount));
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown transaction type");
-    }
-
-    accountRepository.save(account);
-}
 
     private Transaction createBaseTransaction(
             Long accountId,
@@ -277,14 +252,12 @@ public void deleteTransaction(Long transactionId) {
         tx.setDescription(description);
         tx.setTransactionDate(date != null ? date : LocalDate.now());
 
-        // 🔒 USER ISOLATION
         User user = new User();
         user.setId(securityUtils.getCurrentUserId());
         tx.setUser(user);
 
         return tx;
     }
-
     private Transaction save(Transaction tx) {
         return transactionRepository.save(tx);
     }

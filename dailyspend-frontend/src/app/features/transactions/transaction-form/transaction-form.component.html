@@ -1,55 +1,183 @@
-<h2>Create Transaction</h2>
+<div class="transaction-form-container">
 
-<select [(ngModel)]="type">
-  <option value="EXPENSE">Expense</option>
-  <option value="MONEY_GIVEN">Money Given</option>
-  <option value="MONEY_TAKEN">Money Taken</option>
-</select>
-
-<select [(ngModel)]="selectedAccountId">
-  <option [ngValue]="null">Select account</option>
-  <option *ngFor="let acc of accounts" [ngValue]="acc.id">
-    {{ acc.name }}
-  </option>
-</select>
-
-<div *ngIf="type === 'EXPENSE'">
-  <select [(ngModel)]="selectedCategoryId">
-    <option [ngValue]="null">Select category</option>
-    <option *ngFor="let cat of categories" [ngValue]="cat.id">
-      {{ cat.name }}
-    </option>
-  </select>
-</div>
-
-<div *ngIf="type !== 'EXPENSE'">
-
-  <select
-    [(ngModel)]="selectedPersonId"
-    (ngModelChange)="creatingPerson = ($event === 'new')"
-  >
-    <option [ngValue]="null">Select person</option>
-    <option *ngFor="let p of people" [ngValue]="p.id">
-      {{ p.name }}
-    </option>
-    <option value="new">➕ Add New Person</option>
-  </select>
-
-  <div *ngIf="creatingPerson">
-    <input
-      type="text"
-      placeholder="Person name"
-      [(ngModel)]="newPersonName"
-    />
-    <button (click)="createNewPerson()">Save Person</button>
+  <!-- Header -->
+  <div class="form-header">
+    <h1 class="page-title">
+      {{ isEditMode ? 'Edit Transaction' : 'New Transaction' }}
+    </h1>
+    <a routerLink="/transactions" class="btn-back">
+      ← Back to Transactions
+    </a>
   </div>
 
+  <!-- Form Card -->
+  <div class="form-card">
+
+    <!-- Messages -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <!-- Transaction Type Selector -->
+    <div class="type-selector">
+      <h3>Transaction Type</h3>
+      <div class="type-buttons">
+
+        <button
+          type="button"
+          class="type-btn"
+          [class.active]="transactionData.type === 'EXPENSE'"
+          (click)="selectType('EXPENSE')">
+          <div class="type-btn-icon">💸</div>
+          <div class="type-btn-label">Expense</div>
+        </button>
+
+        <button
+          type="button"
+          class="type-btn"
+          [class.active]="transactionData.type === 'MONEY_GIVEN'"
+          (click)="selectType('MONEY_GIVEN')">
+          <div class="type-btn-icon">➡️</div>
+          <div class="type-btn-label">Money Given</div>
+        </button>
+
+        <button
+          type="button"
+          class="type-btn"
+          [class.active]="transactionData.type === 'MONEY_TAKEN'"
+          (click)="selectType('MONEY_TAKEN')">
+          <div class="type-btn-icon">⬅️</div>
+          <div class="type-btn-label">Money Taken</div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Transaction Form -->
+    <form class="transaction-form" (ngSubmit)="onSubmit()">
+
+      <!-- Account & Amount Row -->
+      <div class="form-row">
+
+        <div class="form-group">
+          <label for="account">
+            Account <span class="required">*</span>
+          </label>
+          <select
+            id="account"
+            name="account"
+            [(ngModel)]="transactionData.accountId"
+            required>
+            <option value="" disabled>Select an account</option>
+            <option *ngFor="let account of accounts" [value]="account.id">
+              {{ account.name }} ({{ formatCurrency(account.balance) }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="amount">
+            Amount <span class="required">*</span>
+          </label>
+          <input
+            type="number"
+            id="amount"
+            name="amount"
+            class="amount-input"
+            [(ngModel)]="transactionData.amount"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+            required
+          />
+        </div>
+
+      </div>
+
+      <!-- Category (only for EXPENSE) -->
+      <div class="form-group" *ngIf="transactionData.type === 'EXPENSE'">
+        <label for="category">
+          Category
+        </label>
+        <select
+          id="category"
+          name="category"
+          [(ngModel)]="transactionData.category">
+          <option value="">Select a category</option>
+          <option *ngFor="let category of categories" [value]="category.name">
+            {{ category.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Person (for MONEY_GIVEN and MONEY_TAKEN) -->
+      <div class="form-group" *ngIf="transactionData.type !== 'EXPENSE'">
+        <label for="person">
+          Person <span class="required">*</span>
+        </label>
+        <select
+          id="person"
+          name="person"
+          [(ngModel)]="transactionData.personId"
+          required>
+          <option value="" disabled>Select a person</option>
+          <option *ngFor="let person of people" [value]="person.id">
+            {{ person.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label for="date">
+          Transaction Date <span class="required">*</span>
+        </label>
+        <input
+          type="date"
+          id="date"
+          name="date"
+          [(ngModel)]="transactionData.transactionDate"
+          required
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="description">
+          Description
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          [(ngModel)]="transactionData.description"
+          placeholder="Add notes about this transaction..."
+          rows="3"
+        ></textarea>
+        <span class="form-hint">Optional but helpful for tracking</span>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          routerLink="/transactions">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="loading || !isFormValid()">
+          {{ loading ? 'Saving...' : (isEditMode ? 'Update Transaction' : 'Create Transaction') }}
+        </button>
+      </div>
+
+    </form>
+
+  </div>
 </div>
-
-<input type="number" placeholder="Amount" [(ngModel)]="amount" />
-<input type="text" placeholder="Description" [(ngModel)]="description" />
-<input type="date" [(ngModel)]="date" />
-
-<button (click)="submit()" [disabled]="loading">
-  Create
-</button>

@@ -1,21 +1,88 @@
-<div class="layout">
+<div class="app-layout">
 
-  <aside class="sidebar">
-    <h3>DailySpend</h3>
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.collapsed]="isCollapsed" [class.open]="isMobileOpen">
 
-    <nav>
-      <a routerLink="/dashboard">Dashboard</a>
-      <a routerLink="/transactions">Transactions</a>
-      <a routerLink="/people">People</a>
-      <a routerLink="/reports">Reports</a>
-      <a routerLink="/transactions/new">Add Transaction</a>
+    <div class="sidebar-header">
+      <div class="logo-icon">₹</div>
+      <div class="logo-text" *ngIf="!isCollapsed">
+        DailySpend
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a routerLink="/dashboard"
+         routerLinkActive="active"
+         class="nav-item"
+         (click)="closeMobileSidebar()">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Dashboard</span>
+      </a>
+
+      <a routerLink="/transactions"
+         routerLinkActive="active"
+         class="nav-item"
+         (click)="closeMobileSidebar()">
+        <span class="nav-icon">🧾</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Transactions</span>
+      </a>
+
+      <a routerLink="/people"
+         routerLinkActive="active"
+         class="nav-item"
+         (click)="closeMobileSidebar()">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label" *ngIf="!isCollapsed">People</span>
+      </a>
+
+      <a routerLink="/reports"
+         routerLinkActive="active"
+         class="nav-item"
+         (click)="closeMobileSidebar()">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Reports</span>
+      </a>
     </nav>
 
-    <button (click)="logout()">Logout</button>
+    <!-- Logout at bottom -->
+    <div class="nav" style="padding-top: 0;">
+      <a (click)="logout()"
+         class="nav-item"
+         style="cursor: pointer;">
+        <span class="nav-icon">🚪</span>
+        <span class="nav-label" *ngIf="!isCollapsed">Logout</span>
+      </a>
+    </div>
+
   </aside>
 
-  <main class="content">
-    <router-outlet></router-outlet>
-  </main>
+  <!-- Mobile Overlay -->
+  <div class="sidebar-overlay" 
+       [class.active]="isMobileOpen"
+       (click)="closeMobileSidebar()"></div>
 
+  <!-- Main Area -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <button class="menu-toggle" (click)="toggleSidebar()">
+        ☰
+      </button>
+
+      <div class="topbar-title">
+        {{ pageTitle }}
+      </div>
+
+      <div class="topbar-right">
+        <span class="currency">₹ INR</span>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
 </div>

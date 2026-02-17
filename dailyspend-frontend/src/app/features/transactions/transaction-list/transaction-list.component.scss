@@ -130,6 +130,15 @@
     }
   }
 }
+.income {
+  color: #16A34A;
+  font-weight: 600;
+}
+
+.expense {
+  color: #C62828;
+  font-weight: 600;
+}
 
 @media (max-width: 768px) {
   .transaction-table {

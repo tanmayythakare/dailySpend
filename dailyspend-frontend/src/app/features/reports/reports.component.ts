@@ -1,95 +1,244 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { TransactionService } from '../../core/services/transaction.service';
-import { Transaction } from '../../models/transaction.model';
 
-import { NgChartsModule } from 'ng2-charts';
+// Summary interface
+interface ReportSummary {
+  totalIncome: number;
+  totalExpenses: number;
+  netFlow: number;
+  transactionCount: number;
+}
+
+// Category data interface
+interface CategoryData {
+  category: string;
+  amount: number;
+  count: number;
+}
+
+// Trend data interface
+interface TrendData {
+  date: string;
+  amount: number;
+}
+
+// Top category interface
+interface TopCategory {
+  name: string;
+  amount: number;
+  count: number;
+}
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, NgChartsModule],
-  templateUrl: './reports.component.html'
+  imports: [CommonModule],
+  templateUrl: './reports.component.html',
+  styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent implements OnInit {
 
-  private transactionService = inject(TransactionService);
+  loading = false;
+  errorMessage = '';
 
-  transactions: Transaction[] = [];
+  // Summary data
+  summary: ReportSummary = {
+    totalIncome: 0,
+    totalExpenses: 0,
+    netFlow: 0,
+    transactionCount: 0
+  };
 
-  // Summary
-  totalExpense = 0;
-  totalGiven = 0;
-  totalTaken = 0;
+  // Chart data
+  categoryData: CategoryData[] = [];
+  trendData: TrendData[] = [];
+  topCategories: TopCategory[] = [];
 
-  // Pie chart
-  pieLabels: string[] = [];
-  pieData: number[] = [];
-
-  // Line chart
-  lineLabels: string[] = [];
-  lineData: number[] = [];
+  constructor(private transactionService: TransactionService) {}
 
   ngOnInit(): void {
-    this.loadData();
+    this.loadReportsData();
   }
 
-  loadData() {
+  loadReportsData(): void {
+    this.loading = true;
+    this.errorMessage = '';
 
-    const params = { page: 0, size: 1000 };
+    // Load all transactions for current month
+    const startDate = this.getStartOfMonth();
+    const endDate = this.getEndOfMonth();
 
-    this.transactionService.getPaged(params).subscribe((res: any) => {
-
-      this.transactions = res.content || [];
-
-      this.calculateSummary();
-      this.prepareCategoryChart();
-      this.prepareTimeChart();
+    this.transactionService.getTransactions(0, 1000).subscribe({
+      next: (response) => {
+        const transactions = response.content || response;
+        
+        // Calculate summary
+        this.calculateSummary(transactions);
+        
+        // Calculate category breakdown
+        this.calculateCategoryData(transactions);
+        
+        // Calculate trend data (last 7 days)
+        this.calculateTrendData(transactions);
+        
+        // Calculate top categories
+        this.calculateTopCategories(transactions);
+        
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading reports:', error);
+        this.errorMessage = 'Failed to load reports. Please try again.';
+        this.loading = false;
+      }
     });
   }
 
-  calculateSummary() {
+  private calculateSummary(transactions: any[]): void {
+    this.summary = {
+      totalIncome: 0,
+      totalExpenses: 0,
+      netFlow: 0,
+      transactionCount: transactions.length
+    };
 
-    this.transactions.forEach(tx => {
-
-      if (tx.type === 'EXPENSE') this.totalExpense += tx.amount;
-      if (tx.type === 'MONEY_GIVEN') this.totalGiven += tx.amount;
-      if (tx.type === 'MONEY_TAKEN') this.totalTaken += tx.amount;
+    transactions.forEach(transaction => {
+      if (transaction.type === 'MONEY_TAKEN') {
+        this.summary.totalIncome += transaction.amount;
+      } else if (transaction.type === 'EXPENSE' || transaction.type === 'MONEY_GIVEN') {
+        this.summary.totalExpenses += transaction.amount;
+      }
     });
+
+    this.summary.netFlow = this.summary.totalIncome - this.summary.totalExpenses;
   }
 
-  prepareCategoryChart() {
+  private calculateCategoryData(transactions: any[]): void {
+    const categoryMap = new Map<string, { amount: number; count: number }>();
 
-    const map: any = {};
-
-    this.transactions
-      .filter(tx => tx.type === 'EXPENSE')
-      .forEach(tx => {
-
-        const name = tx.category?.name || 'Other';
-
-        map[name] = (map[name] || 0) + tx.amount;
+    transactions
+      .filter(t => t.type === 'EXPENSE' && t.category)
+      .forEach(transaction => {
+        const category = transaction.category || 'Uncategorized';
+        const existing = categoryMap.get(category) || { amount: 0, count: 0 };
+        
+        categoryMap.set(category, {
+          amount: existing.amount + transaction.amount,
+          count: existing.count + 1
+        });
       });
 
-    this.pieLabels = Object.keys(map);
-    this.pieData = Object.values(map);
+    this.categoryData = Array.from(categoryMap.entries())
+      .map(([category, data]) => ({
+        category,
+        amount: data.amount,
+        count: data.count
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5); // Top 5 categories
   }
 
-  prepareTimeChart() {
+  private calculateTrendData(transactions: any[]): void {
+    const last7Days = this.getLast7Days();
+    const trendMap = new Map<string, number>();
 
-    const map: any = {};
+    // Initialize all days with 0
+    last7Days.forEach(date => {
+      trendMap.set(date, 0);
+    });
 
-    this.transactions
-      .filter(tx => tx.type === 'EXPENSE')
-      .forEach(tx => {
-
-        const month = tx.transactionDate.substring(0, 7);
-
-        map[month] = (map[month] || 0) + tx.amount;
+    // Calculate expenses for each day
+    transactions
+      .filter(t => t.type === 'EXPENSE' || t.type === 'MONEY_GIVEN')
+      .forEach(transaction => {
+        const date = transaction.transactionDate.split('T')[0];
+        if (trendMap.has(date)) {
+          trendMap.set(date, trendMap.get(date)! + transaction.amount);
+        }
       });
 
-    this.lineLabels = Object.keys(map);
-    this.lineData = Object.values(map);
+    this.trendData = Array.from(trendMap.entries())
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  private calculateTopCategories(transactions: any[]): void {
+    const categoryMap = new Map<string, { amount: number; count: number }>();
+
+    transactions
+      .filter(t => t.type === 'EXPENSE' && t.category)
+      .forEach(transaction => {
+        const category = transaction.category || 'Uncategorized';
+        const existing = categoryMap.get(category) || { amount: 0, count: 0 };
+        
+        categoryMap.set(category, {
+          amount: existing.amount + transaction.amount,
+          count: existing.count + 1
+        });
+      });
+
+    this.topCategories = Array.from(categoryMap.entries())
+      .map(([name, data]) => ({
+        name,
+        amount: data.amount,
+        count: data.count
+      }))
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5); // Top 5
+  }
+
+  private getLast7Days(): string[] {
+    const days: string[] = [];
+    const today = new Date();
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      days.push(date.toISOString().split('T')[0]);
+    }
+
+    return days;
+  }
+
+  private getStartOfMonth(): string {
+    const date = new Date();
+    date.setDate(1);
+    return date.toISOString().split('T')[0];
+  }
+
+  private getEndOfMonth(): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() + 1);
+    date.setDate(0);
+    return date.toISOString().split('T')[0];
+  }
+
+  // Template helper methods
+  getBarWidth(amount: number): number {
+    if (this.categoryData.length === 0) return 0;
+    
+    const maxAmount = Math.max(...this.categoryData.map(c => c.amount));
+    return maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+  }
+
+  getTrendBarWidth(amount: number): number {
+    if (this.trendData.length === 0) return 0;
+    
+    const maxAmount = Math.max(...this.trendData.map(t => t.amount));
+    return maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
+  }
+
+  formatCurrency(value: number): string {
+    if (value === undefined || value === null) {
+      return '₹0.00';
+    }
+    
+    const absValue = Math.abs(value);
+    const formatted = absValue.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
   }
 }

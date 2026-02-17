@@ -1,23 +1,38 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
-import { AuthService } from '../services/auth.service';
+import { Injectable } from '@angular/core';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandler,
+  HttpInterceptor,
+  HttpRequest
+} from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+@Injectable()
+export class ErrorInterceptor implements HttpInterceptor {
 
-  const router = inject(Router);
-  const authService = inject(AuthService);
+  constructor(private snackBar: MatSnackBar) {}
 
-  return next(req).pipe(
-    catchError((error: HttpErrorResponse) => {
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return next.handle(req).pipe(
+      catchError((error: HttpErrorResponse) => {
 
-      if (error.status === 401) {
-        authService.logout();
-        router.navigate(['/login']);
-      }
+        let errorMessage = 'Something went wrong';
 
-      return throwError(() => error);
-    })
-  );
-};
+        if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+
+        this.snackBar.open(errorMessage, 'Close', {
+          duration: 3000,
+          horizontalPosition: 'right',
+          verticalPosition: 'top'
+        });
+
+        return throwError(() => error);
+      })
+    );
+  }
+}

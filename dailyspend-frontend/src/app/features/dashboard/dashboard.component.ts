@@ -1,9 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AccountService } from '../../core/services/account.service';
-import { Account, AccountType } from '../../models/account.model';
 import { Router } from '@angular/router';
+import { AccountService } from '../../core/services/account.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -14,110 +13,140 @@ import { Router } from '@angular/router';
 })
 export class DashboardComponent implements OnInit {
 
-  private accountService = inject(AccountService);
-
-  accountTypes = Object.values(AccountType);
-  private router = inject(Router);
-  
-  accounts: Account[] = [];
+  accounts: any[] = [];
   loading = false;
   creating = false;
-
-  newAccountName = '';
-  newAccountBalance: number | null = null;
-  newAccountType: AccountType | '' = '';
-
-  totalBalance = 0;
-
+  
   successMessage = '';
   errorMessage = '';
 
-  
-ngOnInit(): void {
-  this.router.events.subscribe(() => {
-    this.loadAccounts();
-  });
-}
+  // New account form data
+  newAccountName = '';
+  newAccountBalance = 0;
+  newAccountType = '';
 
-  loadAccounts() {
+  accountTypes = ['CASH', 'BANK', 'CREDIT', 'WALLET'];
+
+  totalBalance = 0;
+
+  constructor(
+    private accountService: AccountService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.loadAccounts();
+  }
+
+  loadAccounts(): void {
     this.loading = true;
-    this.accountService.getAll().subscribe({
-      next: (data) => {
-        this.accounts = data;
-        this.calculateTotal();
+    this.errorMessage = '';
+
+    this.accountService.getAllAccounts().subscribe({
+      next: (accounts) => {
+        this.accounts = accounts;
+        this.calculateTotalBalance();
         this.loading = false;
       },
-      error: () => {
-        this.errorMessage = 'Failed to load accounts.';
+      error: (error) => {
+        console.error('Error loading accounts:', error);
+        this.errorMessage = 'Failed to load accounts. Please try again.';
         this.loading = false;
       }
     });
   }
 
-  createAccount() {
-    if (!this.newAccountName || !this.newAccountType) return;
+  calculateTotalBalance(): void {
+    this.totalBalance = this.accounts.reduce((sum, account) => {
+      return sum + (account.balance || 0);
+    }, 0);
+  }
+
+  createAccount(): void {
+    // Validation
+    if (!this.newAccountName.trim()) {
+      this.errorMessage = 'Please enter an account name';
+      return;
+    }
+
+    if (!this.newAccountType) {
+      this.errorMessage = 'Please select an account type';
+      return;
+    }
 
     this.creating = true;
-    this.clearMessages();
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    const payload = {
-      name: this.newAccountName,
-      type: this.newAccountType,
-      balance: this.newAccountBalance ?? 0
+    const newAccount = {
+      name: this.newAccountName.trim(),
+      balance: this.newAccountBalance || 0,
+      type: this.newAccountType
     };
 
-    this.accountService.create(payload).subscribe({
-      next: () => {
-        this.successMessage = 'Account created successfully.';
-        this.resetForm();
+    this.accountService.createAccount(newAccount).subscribe({
+      next: (account) => {
+        this.successMessage = `Account "${account.name}" created successfully!`;
+        
+        // Reset form
+        this.newAccountName = '';
+        this.newAccountBalance = 0;
+        this.newAccountType = '';
+        
+        // Reload accounts
         this.loadAccounts();
         this.creating = false;
+
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
       },
-      error: () => {
-        this.errorMessage = 'Failed to create account.';
+      error: (error) => {
+        console.error('Error creating account:', error);
+        this.errorMessage = error.error?.message || 'Failed to create account. Please try again.';
         this.creating = false;
       }
     });
   }
 
-  deleteAccount(id: number) {
-    if (!confirm('Are you sure you want to delete this account?')) return;
+  deleteAccount(accountId: number): void {
+    if (!confirm('Are you sure you want to delete this account? All transactions will also be removed.')) {
+      return;
+    }
 
-    this.clearMessages();
-
-    this.accountService.delete(id).subscribe({
+    this.accountService.deleteAccount(accountId).subscribe({
       next: () => {
-        this.successMessage = 'Account deleted successfully.';
+        this.successMessage = 'Account deleted successfully!';
         this.loadAccounts();
+
+        // Clear success message after 3 seconds
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
       },
-      error: () => {
-        this.errorMessage = 'Failed to delete account.';
+      error: (error) => {
+        console.error('Error deleting account:', error);
+        this.errorMessage = 'Failed to delete account. Please try again.';
       }
     });
   }
 
-  calculateTotal() {
-    this.totalBalance = this.accounts.reduce(
-      (sum, acc) => sum + (acc.balance ?? 0),
-      0
-    );
+  viewAccountDetails(accountId: number): void {
+    this.router.navigate(['/accounts', accountId]);
   }
 
-  resetForm() {
-    this.newAccountName = '';
-    this.newAccountBalance = null;
-    this.newAccountType = '';
-  }
-
-  clearMessages() {
-    this.successMessage = '';
-    this.errorMessage = '';
-  }
-
-  formatCurrency(value: number | undefined): string {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR'
-    }).format(value ?? 0);
+  formatCurrency(value: number): string {
+    if (value === undefined || value === null) {
+      return '₹0.00';
+    }
+    
+    const absValue = Math.abs(value);
+    const formatted = absValue.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+    
+    return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
   }
 }

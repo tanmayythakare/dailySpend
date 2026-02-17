@@ -1,42 +1,104 @@
-<h2>People</h2>
+<div class="people-list-container">
 
-<div class="actions">
-  <button (click)="startAdd()" *ngIf="!adding">
-    + Add Person
-  </button>
-</div>
+  <!-- Header -->
+  <div class="list-header">
+    <h1 class="page-title">People</h1>
 
-<!-- ADD PERSON FORM -->
-<div *ngIf="adding" class="add-box">
-  <input [(ngModel)]="newPersonName" placeholder="Person name">
-  <button (click)="savePerson()">Save</button>
-  <button (click)="cancelAdd()">Cancel</button>
-</div>
+    <button class="btn-add" (click)="showAddForm = !showAddForm">
+      {{ showAddForm ? '✕ Cancel' : '➕ Add Person' }}
+    </button>
+  </div>
 
-<!-- LOADING -->
-<div *ngIf="loading">
-  Loading people...
-</div>
+  <!-- Add Person Form -->
+  <div class="add-person-card" *ngIf="showAddForm">
+    <h3>Add New Person</h3>
 
-<!-- EMPTY -->
-<div *ngIf="!loading && people.length === 0">
-  No people yet
-</div>
+    <form class="person-form" (ngSubmit)="addPerson()">
+      <input
+        type="text"
+        placeholder="Person name"
+        [(ngModel)]="newPersonName"
+        name="personName"
+        required
+      />
 
-<!-- PEOPLE LIST -->
-<div *ngIf="!loading && people.length > 0" class="people-list">
+      <button type="submit" [disabled]="!newPersonName || loading">
+        {{ loading ? 'Adding...' : 'Add Person' }}
+      </button>
+    </form>
+  </div>
 
-  <div class="person-card"
-       *ngFor="let p of people"
-       (click)="openPerson(p)">
+  <!-- Messages -->
+  <div class="error-message" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
 
-    <div class="name">
-      {{ p.name }}
+  <div class="success-message" *ngIf="successMessage">
+    {{ successMessage }}
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="loading && !people.length">
+    <div class="spinner"></div>
+    <p>Loading people...</p>
+  </div>
+
+  <!-- People Grid -->
+  <div class="people-grid" *ngIf="!loading && people.length > 0">
+
+    <div class="person-card" *ngFor="let person of people">
+
+      <div class="person-header">
+        <div class="person-avatar">
+          {{ getInitials(person.name) }}
+        </div>
+        <div class="person-info">
+          <h3>{{ person.name }}</h3>
+          <p class="person-meta">
+            {{ person.transactionCount || 0 }} transaction{{ person.transactionCount === 1 ? '' : 's' }}
+          </p>
+        </div>
+      </div>
+
+      <div class="person-balance">
+        <span class="balance-label">Balance</span>
+        <span class="balance-amount"
+              [class.positive]="person.balance > 0"
+              [class.negative]="person.balance < 0"
+              [class.zero]="person.balance === 0">
+          {{ formatCurrency(person.balance) }}
+        </span>
+      </div>
+
+      <div class="balance-hint">
+        <span *ngIf="person.balance > 0">They owe you</span>
+        <span *ngIf="person.balance < 0">You owe them</span>
+        <span *ngIf="person.balance === 0">All settled up</span>
+      </div>
+
+      <div class="person-actions">
+        <button class="btn-view" (click)="viewDetails(person.id!)">
+          View Ledger
+        </button>
+        <button class="btn-delete" (click)="deletePerson(person.id!)">
+          Delete
+        </button>
+      </div>
+
     </div>
 
-    <div class="balance">
-    </div>
+  </div>
 
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!loading && people.length === 0">
+    <div class="empty-icon">👥</div>
+    <h3 class="empty-title">No people yet</h3>
+    <p class="empty-text">
+      Add people to track money you've given or taken
+    </p>
+    <button class="btn-add" (click)="showAddForm = true" *ngIf="!showAddForm">
+      Add First Person
+    </button>
   </div>
 
 </div>

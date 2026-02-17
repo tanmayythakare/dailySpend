@@ -25,6 +25,7 @@ import { Category } from '../../../models/category.model';
 import { FormsModule } from '@angular/forms';
 import { Person } from '../../../models/person.model';
 import { HostListener } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
@@ -56,7 +57,6 @@ export class TransactionListComponent implements OnInit {
   people: Person[] = [];
   loading = true;
   displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'actions'];
-
 
   // Pagination
   totalItems = 0;
@@ -90,7 +90,8 @@ export class TransactionListComponent implements OnInit {
     private categoryService: CategoryService,
     private personService: PersonService,
     private dialog: MatDialog,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private snackBar:MatSnackBar
   ) {
     this.filterForm = this.fb.group({
       accountId: [null],
@@ -229,14 +230,20 @@ export class TransactionListComponent implements OnInit {
   }
 
   deleteTransaction(id: number): void {
-    if (confirm('Are you sure you want to delete this transaction?')) {
+    if (confirm('Are you sure you want to delete this transaction?')
+) {
       this.transactionService.delete(id).subscribe({
         next: () => {
           this.loadTransactions();
         },
         error: (error) => {
           console.error('Error deleting transaction:', error);
-          alert('Failed to delete transaction');
+          this.snackBar.open('Failed to delete transaction', 'Close', {
+  duration: 3000,
+  horizontalPosition: 'right',
+  verticalPosition: 'top'
+});
+
         }
       });
     }
@@ -271,7 +278,12 @@ export class TransactionListComponent implements OnInit {
 
   // prevent editing another row
   if (this.editingId !== null && this.editingId !== tx.id) {
-    alert('Finish editing current row first');
+    this.snackBar.open('Finish editing current row first', 'Close', {
+  duration: 3000,
+  horizontalPosition: 'right',
+  verticalPosition: 'top'
+});
+
     return;
   }
 
@@ -290,7 +302,12 @@ saveEdit() {
   if (!this.editingId) return;
 
   if (!this.editData.amount || !this.editData.account?.id) {
-    alert('Amount and account are required');
+    this.snackBar.open('Amount and account are required', 'Close', {
+  duration: 3000,
+  horizontalPosition: 'right',
+  verticalPosition: 'top'
+});
+
     return;
   }
 

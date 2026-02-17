@@ -1,45 +1,62 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './login.component.html'
+  imports: [CommonModule, FormsModule, RouterLink],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
 
-  private fb = inject(FormBuilder);
-  private authService = inject(AuthService);
-  private router = inject(Router);
+  credentials = {
+    username: '',
+    password: ''
+  };
 
   loading = false;
-  error: string | null = null;
+  errorMessage = '';
 
-  form = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required]
-  });
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  onSubmit() {
-
-    if (this.form.invalid) return;
+  onSubmit(): void {
+    // Validation
+    if (!this.credentials.username || !this.credentials.password) {
+      this.errorMessage = 'Please enter both username and password';
+      return;
+    }
 
     this.loading = true;
-    this.error = null;
+    this.errorMessage = '';
 
-    this.authService.login(this.form.value as any)
-      .subscribe({
-        next: () => {
-          this.router.navigate(['/dashboard']);
-        },
-        error: () => {
-          this.error = 'Invalid credentials';
-          this.loading = false;
+    this.authService.login(this.credentials).subscribe({
+      next: (response) => {
+        // Store token
+        localStorage.setItem('token', response.token);
+        
+        // Navigate to dashboard
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        console.error('Login error:', error);
+        
+        if (error.status === 401) {
+          this.errorMessage = 'Invalid username or password';
+        } else if (error.status === 0) {
+          this.errorMessage = 'Cannot connect to server. Please check your connection.';
+        } else {
+          this.errorMessage = error.error?.message || 'Login failed. Please try again.';
         }
-      });
+        
+        this.loading = false;
+      }
+    });
   }
 }
