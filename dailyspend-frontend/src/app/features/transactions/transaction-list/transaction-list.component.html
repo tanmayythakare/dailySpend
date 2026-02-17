@@ -43,28 +43,18 @@
 
       <div>
         <label>From Date</label>
-        <input
-          type="date"
-          [(ngModel)]="filters.fromDate"
-          (change)="applyFilters()"
-        />
+        <input type="date" [(ngModel)]="filters.fromDate" (change)="applyFilters()" />
       </div>
 
       <div>
         <label>To Date</label>
-        <input
-          type="date"
-          [(ngModel)]="filters.toDate"
-          (change)="applyFilters()"
-        />
+        <input type="date" [(ngModel)]="filters.toDate" (change)="applyFilters()" />
       </div>
 
     </div>
 
     <div class="filter-actions">
-      <button class="btn-clear" (click)="clearFilters()">
-        Clear Filters
-      </button>
+      <button class="btn-clear" (click)="clearFilters()">Clear Filters</button>
     </div>
   </div>
 
@@ -98,7 +88,10 @@
           </td>
 
           <td data-label="Type">
-            <span class="type-badge" [class]="transaction.type.toLowerCase()">
+            <span class="type-badge"
+                  [class.expense]="transaction.type === 'EXPENSE'"
+                  [class.money-given]="transaction.type === 'MONEY_GIVEN'"
+                  [class.money-taken]="transaction.type === 'MONEY_TAKEN'">
               {{ formatType(transaction.type) }}
             </span>
           </td>
@@ -108,11 +101,11 @@
           </td>
 
           <td class="account-cell" data-label="Account">
-            {{ getAccountName(transaction.accountId) }}
+            {{ getAccountName(transaction) }}
           </td>
 
           <td class="category-cell" data-label="Category">
-            {{ transaction.category || '—' }}
+            {{ getCategoryName(transaction) }}
           </td>
 
           <td class="amount-cell" data-label="Amount"
@@ -122,10 +115,10 @@
           </td>
 
           <td class="actions-cell" data-label="Actions">
-            <button class="action-btn" (click)="editTransaction(transaction.id!)">
+            <button class="action-btn" (click)="editTransaction(transaction.id)">
               Edit
             </button>
-            <button class="action-btn delete" (click)="deleteTransaction(transaction.id!)">
+            <button class="action-btn delete" (click)="deleteTransaction(transaction.id)">
               Delete
             </button>
           </td>
@@ -135,7 +128,7 @@
 
     </table>
 
-    <!-- Pagination -->
+    <!-- Pagination — uses currentPage getter, Math exposed via this.Math -->
     <div class="pagination">
       <div class="pagination-info">
         Showing {{ (currentPage - 1) * pageSize + 1 }} to
@@ -179,4 +172,5 @@
       Add First Transaction
     </button>
   </div>
+
 </div>

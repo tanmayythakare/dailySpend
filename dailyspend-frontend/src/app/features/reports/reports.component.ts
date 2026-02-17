@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TransactionService } from '../../core/services/transaction.service';
 
-// Summary interface
 interface ReportSummary {
   totalIncome: number;
   totalExpenses: number;
@@ -10,20 +9,17 @@ interface ReportSummary {
   transactionCount: number;
 }
 
-// Category data interface
 interface CategoryData {
   category: string;
   amount: number;
   count: number;
 }
 
-// Trend data interface
 interface TrendData {
   date: string;
   amount: number;
 }
 
-// Top category interface
 interface TopCategory {
   name: string;
   amount: number;
@@ -42,7 +38,6 @@ export class ReportsComponent implements OnInit {
   loading = false;
   errorMessage = '';
 
-  // Summary data
   summary: ReportSummary = {
     totalIncome: 0,
     totalExpenses: 0,
@@ -50,7 +45,6 @@ export class ReportsComponent implements OnInit {
     transactionCount: 0
   };
 
-  // Chart data
   categoryData: CategoryData[] = [];
   trendData: TrendData[] = [];
   topCategories: TopCategory[] = [];
@@ -65,29 +59,19 @@ export class ReportsComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
-    // Load all transactions for current month
-    const startDate = this.getStartOfMonth();
-    const endDate = this.getEndOfMonth();
+    // getPaged with a large size effectively fetches all transactions
+    this.transactionService.getPaged({ page: 0, size: 1000 }).subscribe({
+      next: (response: any) => {
+        const transactions = response.content || [];
 
-    this.transactionService.getTransactions(0, 1000).subscribe({
-      next: (response) => {
-        const transactions = response.content || response;
-        
-        // Calculate summary
         this.calculateSummary(transactions);
-        
-        // Calculate category breakdown
         this.calculateCategoryData(transactions);
-        
-        // Calculate trend data (last 7 days)
         this.calculateTrendData(transactions);
-        
-        // Calculate top categories
         this.calculateTopCategories(transactions);
-        
+
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading reports:', error);
         this.errorMessage = 'Failed to load reports. Please try again.';
         this.loading = false;
@@ -103,11 +87,11 @@ export class ReportsComponent implements OnInit {
       transactionCount: transactions.length
     };
 
-    transactions.forEach(transaction => {
-      if (transaction.type === 'MONEY_TAKEN') {
-        this.summary.totalIncome += transaction.amount;
-      } else if (transaction.type === 'EXPENSE' || transaction.type === 'MONEY_GIVEN') {
-        this.summary.totalExpenses += transaction.amount;
+    transactions.forEach(tx => {
+      if (tx.type === 'MONEY_TAKEN') {
+        this.summary.totalIncome += tx.amount;
+      } else if (tx.type === 'EXPENSE' || tx.type === 'MONEY_GIVEN') {
+        this.summary.totalExpenses += tx.amount;
       }
     });
 
@@ -119,42 +103,38 @@ export class ReportsComponent implements OnInit {
 
     transactions
       .filter(t => t.type === 'EXPENSE' && t.category)
-      .forEach(transaction => {
-        const category = transaction.category || 'Uncategorized';
-        const existing = categoryMap.get(category) || { amount: 0, count: 0 };
-        
-        categoryMap.set(category, {
-          amount: existing.amount + transaction.amount,
+      .forEach(tx => {
+        // Backend returns category as a nested object { id, name }
+        const categoryName = tx.category?.name ?? tx.category ?? 'Uncategorized';
+        const existing = categoryMap.get(categoryName) || { amount: 0, count: 0 };
+        categoryMap.set(categoryName, {
+          amount: existing.amount + tx.amount,
           count: existing.count + 1
         });
       });
 
     this.categoryData = Array.from(categoryMap.entries())
-      .map(([category, data]) => ({
-        category,
-        amount: data.amount,
-        count: data.count
-      }))
+      .map(([category, data]) => ({ category, amount: data.amount, count: data.count }))
       .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5); // Top 5 categories
+      .slice(0, 5);
   }
 
   private calculateTrendData(transactions: any[]): void {
     const last7Days = this.getLast7Days();
     const trendMap = new Map<string, number>();
 
-    // Initialize all days with 0
-    last7Days.forEach(date => {
-      trendMap.set(date, 0);
-    });
+    last7Days.forEach(date => trendMap.set(date, 0));
 
-    // Calculate expenses for each day
     transactions
       .filter(t => t.type === 'EXPENSE' || t.type === 'MONEY_GIVEN')
-      .forEach(transaction => {
-        const date = transaction.transactionDate.split('T')[0];
+      .forEach(tx => {
+        // transactionDate comes as 'YYYY-MM-DD' from backend
+        const date = typeof tx.transactionDate === 'string'
+          ? tx.transactionDate.split('T')[0]
+          : tx.transactionDate;
+
         if (trendMap.has(date)) {
-          trendMap.set(date, trendMap.get(date)! + transaction.amount);
+          trendMap.set(date, trendMap.get(date)! + tx.amount);
         }
       });
 
@@ -168,72 +148,46 @@ export class ReportsComponent implements OnInit {
 
     transactions
       .filter(t => t.type === 'EXPENSE' && t.category)
-      .forEach(transaction => {
-        const category = transaction.category || 'Uncategorized';
-        const existing = categoryMap.get(category) || { amount: 0, count: 0 };
-        
-        categoryMap.set(category, {
-          amount: existing.amount + transaction.amount,
+      .forEach(tx => {
+        const categoryName = tx.category?.name ?? tx.category ?? 'Uncategorized';
+        const existing = categoryMap.get(categoryName) || { amount: 0, count: 0 };
+        categoryMap.set(categoryName, {
+          amount: existing.amount + tx.amount,
           count: existing.count + 1
         });
       });
 
     this.topCategories = Array.from(categoryMap.entries())
-      .map(([name, data]) => ({
-        name,
-        amount: data.amount,
-        count: data.count
-      }))
+      .map(([name, data]) => ({ name, amount: data.amount, count: data.count }))
       .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5); // Top 5
+      .slice(0, 5);
   }
 
   private getLast7Days(): string[] {
     const days: string[] = [];
     const today = new Date();
-
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
       days.push(date.toISOString().split('T')[0]);
     }
-
     return days;
   }
 
-  private getStartOfMonth(): string {
-    const date = new Date();
-    date.setDate(1);
-    return date.toISOString().split('T')[0];
-  }
-
-  private getEndOfMonth(): string {
-    const date = new Date();
-    date.setMonth(date.getMonth() + 1);
-    date.setDate(0);
-    return date.toISOString().split('T')[0];
-  }
-
-  // Template helper methods
   getBarWidth(amount: number): number {
     if (this.categoryData.length === 0) return 0;
-    
     const maxAmount = Math.max(...this.categoryData.map(c => c.amount));
     return maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
   }
 
   getTrendBarWidth(amount: number): number {
     if (this.trendData.length === 0) return 0;
-    
     const maxAmount = Math.max(...this.trendData.map(t => t.amount));
     return maxAmount > 0 ? (amount / maxAmount) * 100 : 0;
   }
 
   formatCurrency(value: number): string {
-    if (value === undefined || value === null) {
-      return '₹0.00';
-    }
-    
+    if (value === undefined || value === null) return '₹0.00';
     const absValue = Math.abs(value);
     const formatted = absValue.toLocaleString('en-IN', {
       minimumFractionDigits: 2,

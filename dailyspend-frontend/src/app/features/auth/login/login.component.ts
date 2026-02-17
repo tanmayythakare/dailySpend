@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -27,7 +27,6 @@ export class LoginComponent {
   ) {}
 
   onSubmit(): void {
-    // Validation
     if (!this.credentials.username || !this.credentials.password) {
       this.errorMessage = 'Please enter both username and password';
       return;
@@ -37,16 +36,14 @@ export class LoginComponent {
     this.errorMessage = '';
 
     this.authService.login(this.credentials).subscribe({
-      next: (response) => {
-        // Store token
-        localStorage.setItem('token', response.token);
-        
-        // Navigate to dashboard
+      next: () => {
+        // AuthService.login() already stores the token via tap()
+        // No manual localStorage.setItem needed here
         this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         console.error('Login error:', error);
-        
+
         if (error.status === 401) {
           this.errorMessage = 'Invalid username or password';
         } else if (error.status === 0) {
@@ -54,7 +51,7 @@ export class LoginComponent {
         } else {
           this.errorMessage = error.error?.message || 'Login failed. Please try again.';
         }
-        
+
         this.loading = false;
       }
     });

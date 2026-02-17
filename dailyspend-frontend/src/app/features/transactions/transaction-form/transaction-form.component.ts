@@ -1,17 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { TransactionService } from '../../core/services/transaction.service';
-import { AccountService } from '../../core/services/account.service';
-import { CategoryService } from '../../core/services/category.service';
-import { PersonService } from '../../core/services/person.service';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { TransactionService } from '../../../core/services/transaction.service';
+import { AccountService } from '../../../core/services/account.service';
+import { CategoryService } from '../../../core/services/category.service';
+import { PersonService } from '../../../core/services/person.service';
 
 interface TransactionFormData {
   type: string;
   accountId: number | null;
+  categoryId: number | null;  // store ID, not name
   amount: number;
-  category: string;
   personId: number | null;
   transactionDate: string;
   description: string;
@@ -20,7 +20,7 @@ interface TransactionFormData {
 @Component({
   selector: 'app-transaction-form',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './transaction-form.component.html',
   styleUrls: ['./transaction-form.component.scss']
 })
@@ -35,14 +35,13 @@ export class TransactionFormComponent implements OnInit {
   transactionData: TransactionFormData = {
     type: 'EXPENSE',
     accountId: null,
+    categoryId: null,
     amount: 0,
-    category: '',
     personId: null,
     transactionDate: this.getTodayDate(),
     description: ''
   };
 
-  // Dropdown data
   accounts: any[] = [];
   categories: any[] = [];
   people: any[] = [];
@@ -57,7 +56,6 @@ export class TransactionFormComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Check if editing
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
@@ -65,97 +63,67 @@ export class TransactionFormComponent implements OnInit {
       this.loadTransaction(this.transactionId);
     }
 
-    // Load dropdown data
-    this.loadAccounts();
-    this.loadCategories();
-    this.loadPeople();
+    // ── Fixed: use correct method names ──────────────────────────────────
+    this.accountService.getAllAccounts().subscribe({
+      next: (accounts) => (this.accounts = accounts),
+      error: (err) => console.error('Error loading accounts:', err)
+    });
+
+    this.categoryService.getAllCategories().subscribe({
+      next: (categories) => (this.categories = categories),
+      error: (err) => console.error('Error loading categories:', err)
+    });
+
+    this.personService.getAllPeople().subscribe({
+      next: (people) => (this.people = people),
+      error: (err) => console.error('Error loading people:', err)
+    });
   }
 
   private getTodayDate(): string {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
   }
 
   loadTransaction(id: number): void {
     this.loading = true;
+    // ── Fixed: getTransactionById now exists ─────────────────────────────
     this.transactionService.getTransactionById(id).subscribe({
-      next: (transaction) => {
+      next: (tx: any) => {
         this.transactionData = {
-          type: transaction.type,
-          accountId: transaction.accountId,
-          amount: transaction.amount,
-          category: transaction.category || '',
-          personId: transaction.personId || null,
-          transactionDate: transaction.transactionDate.split('T')[0],
-          description: transaction.description || ''
+          type: tx.type,
+          accountId: tx.account?.id ?? null,
+          categoryId: tx.category?.id ?? null,
+          amount: tx.amount,
+          personId: tx.person?.id ?? null,
+          transactionDate: tx.transactionDate,
+          description: tx.description || ''
         };
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Error loading transaction:', error);
+      error: (err) => {
+        console.error('Error loading transaction:', err);
         this.errorMessage = 'Failed to load transaction';
         this.loading = false;
       }
     });
   }
 
-  loadAccounts(): void {
-    this.accountService.getAllAccounts().subscribe({
-      next: (accounts) => {
-        this.accounts = accounts;
-      },
-      error: (error) => {
-        console.error('Error loading accounts:', error);
-      }
-    });
-  }
-
-  loadCategories(): void {
-    this.categoryService.getAllCategories().subscribe({
-      next: (categories) => {
-        this.categories = categories;
-      },
-      error: (error) => {
-        console.error('Error loading categories:', error);
-      }
-    });
-  }
-
-  loadPeople(): void {
-    this.personService.getAllPeople().subscribe({
-      next: (people) => {
-        this.people = people;
-      },
-      error: (error) => {
-        console.error('Error loading people:', error);
-      }
-    });
-  }
-
   selectType(type: string): void {
     this.transactionData.type = type;
-    
-    // Reset type-specific fields
     if (type === 'EXPENSE') {
       this.transactionData.personId = null;
     } else {
-      this.transactionData.category = '';
+      this.transactionData.categoryId = null;
     }
   }
 
   isFormValid(): boolean {
-    const hasType = !!this.transactionData.type;
     const hasAccount = !!this.transactionData.accountId;
     const hasAmount = this.transactionData.amount > 0;
     const hasDate = !!this.transactionData.transactionDate;
-
-    // For EXPENSE, no person required
-    // For MONEY_GIVEN and MONEY_TAKEN, person is required
-    const hasRequiredPerson = 
-      this.transactionData.type === 'EXPENSE' || 
-      !!this.transactionData.personId;
-
-    return hasType && hasAccount && hasAmount && hasDate && hasRequiredPerson;
+    const hasRequiredPerson =
+      this.transactionData.type === 'EXPENSE' || !!this.transactionData.personId;
+    return hasAccount && hasAmount && hasDate && hasRequiredPerson;
   }
 
   onSubmit(): void {
@@ -168,43 +136,39 @@ export class TransactionFormComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const transactionPayload = {
+    // ── Build payload using IDs, not names ───────────────────────────────
+    const payload = {
       type: this.transactionData.type,
       accountId: this.transactionData.accountId,
       amount: this.transactionData.amount,
-      category: this.transactionData.category || null,
-      personId: this.transactionData.personId || null,
+      categoryId: this.transactionData.categoryId ?? null,
+      personId: this.transactionData.personId ?? null,
       transactionDate: this.transactionData.transactionDate,
       description: this.transactionData.description || null
     };
 
     if (this.isEditMode && this.transactionId) {
-      // Update existing transaction
-      this.transactionService.updateTransaction(this.transactionId, transactionPayload).subscribe({
+      this.transactionService.updateTransaction(this.transactionId, payload).subscribe({
         next: () => {
           this.successMessage = 'Transaction updated successfully!';
-          setTimeout(() => {
-            this.router.navigate(['/transactions']);
-          }, 1500);
+          setTimeout(() => this.router.navigate(['/transactions']), 1500);
         },
-        error: (error) => {
-          console.error('Error updating transaction:', error);
-          this.errorMessage = error.error?.message || 'Failed to update transaction';
+        error: (err) => {
+          console.error('Error updating transaction:', err);
+          this.errorMessage = err.error?.message || 'Failed to update transaction';
           this.loading = false;
         }
       });
     } else {
-      // Create new transaction
-      this.transactionService.createTransaction(transactionPayload).subscribe({
+      // ── Fixed: createTransaction now exists and routes by type ───────
+      this.transactionService.createTransaction(payload).subscribe({
         next: () => {
           this.successMessage = 'Transaction created successfully!';
-          setTimeout(() => {
-            this.router.navigate(['/transactions']);
-          }, 1500);
+          setTimeout(() => this.router.navigate(['/transactions']), 1500);
         },
-        error: (error) => {
-          console.error('Error creating transaction:', error);
-          this.errorMessage = error.error?.message || 'Failed to create transaction';
+        error: (err) => {
+          console.error('Error creating transaction:', err);
+          this.errorMessage = err.error?.message || 'Failed to create transaction';
           this.loading = false;
         }
       });
@@ -212,10 +176,7 @@ export class TransactionFormComponent implements OnInit {
   }
 
   formatCurrency(value: number): string {
-    if (value === undefined || value === null) {
-      return '₹0.00';
-    }
-    
+    if (value === undefined || value === null) return '₹0.00';
     const formatted = Math.abs(value).toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2

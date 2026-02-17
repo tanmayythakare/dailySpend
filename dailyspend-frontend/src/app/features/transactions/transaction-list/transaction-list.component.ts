@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink, Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,18 +17,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBar } from '@angular/material/snack-bar';
+
 import { TransactionService } from '../../../core/services/transaction.service';
 import { AccountService } from '../../../core/services/account.service';
 import { CategoryService } from '../../../core/services/category.service';
 import { PersonService } from '../../../core/services/person.service';
-import { TransactionFormComponent } from '../transaction-form/transaction-form.component';
+
 import { Transaction } from '../../../models/transaction.model';
 import { Account } from '../../../models/account.model';
 import { Category } from '../../../models/category.model';
-import { FormsModule } from '@angular/forms';
 import { Person } from '../../../models/person.model';
-import { HostListener } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+
 @Component({
   selector: 'app-transaction-list',
   standalone: true,
@@ -33,6 +36,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    RouterLink,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -51,38 +55,52 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   styleUrls: ['./transaction-list.component.scss']
 })
 export class TransactionListComponent implements OnInit {
+
   transactions: Transaction[] = [];
   accounts: Account[] = [];
   categories: Category[] = [];
   people: Person[] = [];
   loading = true;
-  displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'actions'];
 
-  // Pagination
+  // ── Expose Math so the template can call Math.min() ──────────────────────
+  Math = Math;
+
+  // ── Pagination state ──────────────────────────────────────────────────────
   totalItems = 0;
   pageSize = 10;
-  pageIndex = 0;
+  pageIndex = 0;          // 0-based internally
 
+  get currentPage(): number { return this.pageIndex + 1; }   // 1-based for display
+  get totalPages(): number  { return Math.ceil(this.totalItems / this.pageSize) || 1; }
+
+  // ── Filter state (used by ngModel in template) ────────────────────────────
+  filters: {
+    type: string;
+    accountId: string;
+    fromDate: string;
+    toDate: string;
+  } = {
+    type: '',
+    accountId: '',
+    fromDate: '',
+    toDate: ''
+  };
+
+  showFilters = false;
+
+  // ── Inline edit state ─────────────────────────────────────────────────────
   editingId: number | null = null;
   editData: any = {};
 
-
-  // Filter Form
+  // ── Reactive form for sort (used by mat-select) ───────────────────────────
   filterForm: FormGroup;
-  showFilters = false;
 
-  transactionTypes = [
-    { value: 'EXPENSE', label: 'Expense' },
-    { value: 'MONEY_GIVEN', label: 'Money Given' },
-    { value: 'MONEY_TAKEN', label: 'Money Taken' }
-  ];
   sortOptions = [
-  { value: 'DATE_DESC', label: 'Newest First' },
-  { value: 'DATE_ASC', label: 'Oldest First' },
-  { value: 'AMOUNT_DESC', label: 'Amount: High to Low' },
-  { value: 'AMOUNT_ASC', label: 'Amount: Low to High' }
-];
-
+    { value: 'DATE_DESC',    label: 'Newest First' },
+    { value: 'DATE_ASC',     label: 'Oldest First' },
+    { value: 'AMOUNT_DESC',  label: 'Amount: High to Low' },
+    { value: 'AMOUNT_ASC',   label: 'Amount: Low to High' }
+  ];
 
   constructor(
     private transactionService: TransactionService,
@@ -91,116 +109,96 @@ export class TransactionListComponent implements OnInit {
     private personService: PersonService,
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private snackBar:MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
     this.filterForm = this.fb.group({
-      accountId: [null],
-      type: [null],
-      startDate: [null],
-      endDate: [null],
-      sortOption: [this.sortOptions]
+      accountId:  [null],
+      type:       [null],
+      startDate:  [null],
+      endDate:    [null],
+      sortOption: ['DATE_DESC']
     });
   }
-  ngAfterViewInit() {
-  console.log('Sort Options:', this.sortOptions);
-  console.log('Accounts:', this.accounts);
-  console.log('Transaction Types:', this.transactionTypes);
-}
-
 
   ngOnInit(): void {
     this.loadDropdownData();
     this.loadTransactions();
 
-    // React to filter changes
     this.filterForm.valueChanges.subscribe(() => {
-      this.pageIndex = 0; // Reset to first page
+      this.pageIndex = 0;
       this.loadTransactions();
     });
   }
 
+  // ── Data loading ──────────────────────────────────────────────────────────
+
   loadDropdownData(): void {
     this.accountService.getAll().subscribe({
-      next: (accounts) => this.accounts = accounts,
-      error: (error) => console.error('Error loading accounts:', error)
+      next: (accounts: Account[]) => (this.accounts = accounts),
+      error: (err: any) => console.error('Error loading accounts:', err)
     });
-
     this.categoryService.getAll().subscribe({
-      next: (categories) => this.categories = categories,
-      error: (error) => console.error('Error loading categories:', error)
+      next: (categories: Category[]) => (this.categories = categories),
+      error: (err: any) => console.error('Error loading categories:', err)
     });
-
     this.personService.getAll().subscribe({
-      next: (people) => this.people = people,
-      error: (error) => console.error('Error loading people:', error)
+      next: (people: Person[]) => (this.people = people),
+      error: (err: any) => console.error('Error loading people:', err)
     });
   }
 
   loadTransactions(): void {
-  this.loading = true;
+    this.loading = true;
 
-  const filters = this.filterForm.value;
+    const f = this.filterForm.value;
+    let sortBy = 'transactionDate';
+    let direction = 'desc';
 
-  let sortBy = 'transactionDate';
-  let direction = 'desc';
-
-  switch (filters.sortOption) {
-    case 'DATE_ASC':
-      sortBy = 'transactionDate';
-      direction = 'asc';
-      break;
-    case 'AMOUNT_DESC':
-      sortBy = 'amount';
-      direction = 'desc';
-      break;
-    case 'AMOUNT_ASC':
-      sortBy = 'amount';
-      direction = 'asc';
-      break;
-    default:
-      sortBy = 'transactionDate';
-      direction = 'desc';
-  }
-  
-
-  const params: any = {
-    page: this.pageIndex,
-    size: this.pageSize,
-    sortBy,
-    direction
-  };
-
-  if (filters.accountId) params.accountId = filters.accountId;
-  if (filters.type) params.type = filters.type;
-  if (filters.startDate) params.startDate = this.formatDate(filters.startDate);
-  if (filters.endDate) params.endDate = this.formatDate(filters.endDate);
-
-  this.transactionService.getPaged(params).subscribe({
-    next: (response: any) => {
-      this.transactions = response.content || [];
-      this.totalItems = response.totalElements || 0;
-      this.loading = false;
-    },
-    error: (error) => {
-      console.error('Error loading transactions:', error);
-      this.loading = false;
+    switch (f.sortOption) {
+      case 'DATE_ASC':    sortBy = 'transactionDate'; direction = 'asc';  break;
+      case 'AMOUNT_DESC': sortBy = 'amount';           direction = 'desc'; break;
+      case 'AMOUNT_ASC':  sortBy = 'amount';           direction = 'asc';  break;
+      default:            sortBy = 'transactionDate'; direction = 'desc';
     }
-  });
-}
 
+    const params: any = {
+      page: this.pageIndex,
+      size: this.pageSize,
+      sortBy,
+      direction
+    };
 
-  formatDate(date: Date): string {
-    if (!date) return '';
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    // Simple filter panel (ngModel-based, separate from filterForm)
+    if (this.filters.type)      params.type      = this.filters.type;
+    if (this.filters.accountId) params.accountId = this.filters.accountId;
+    if (this.filters.fromDate)  params.startDate = this.filters.fromDate;
+    if (this.filters.toDate)    params.endDate   = this.filters.toDate;
+
+    // Reactive form filters (override if set)
+    if (f.accountId)  params.accountId = f.accountId;
+    if (f.type)       params.type      = f.type;
+    if (f.startDate)  params.startDate = this.formatDate(f.startDate);
+    if (f.endDate)    params.endDate   = this.formatDate(f.endDate);
+
+    this.transactionService.getPaged(params).subscribe({
+      next: (response: any) => {
+        this.transactions = response.content || [];
+        this.totalItems   = response.totalElements || 0;
+        this.loading = false;
+      },
+      error: (err: any) => {
+        console.error('Error loading transactions:', err);
+        this.loading = false;
+      }
+    });
   }
 
-  onPageChange(event: PageEvent): void {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
+  // ── Filter helpers ────────────────────────────────────────────────────────
+
+  /** Called by (change) on the simple filter panel dropdowns/inputs */
+  applyFilters(): void {
+    this.pageIndex = 0;
     this.loadTransactions();
   }
 
@@ -209,134 +207,172 @@ export class TransactionListComponent implements OnInit {
   }
 
   clearFilters(): void {
-    this.filterForm.reset();
+    this.filters = { type: '', accountId: '', fromDate: '', toDate: '' };
+    this.filterForm.reset({ sortOption: 'DATE_DESC' });
   }
 
-  openAddTransactionDialog(): void {
-    const dialogRef = this.dialog.open(TransactionFormComponent, {
-      width: '600px',
-      data: {
-        accounts: this.accounts,
-        categories: this.categories,
-        people: this.people
-      }
-    });
+  // ── Pagination helpers (used in template) ─────────────────────────────────
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadTransactions();
-      }
-    });
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.pageIndex = page - 1;
+    this.loadTransactions();
   }
 
-  deleteTransaction(id: number): void {
-    if (confirm('Are you sure you want to delete this transaction?')
-) {
-      this.transactionService.delete(id).subscribe({
-        next: () => {
-          this.loadTransactions();
-        },
-        error: (error) => {
-          console.error('Error deleting transaction:', error);
-          this.snackBar.open('Failed to delete transaction', 'Close', {
-  duration: 3000,
-  horizontalPosition: 'right',
-  verticalPosition: 'top'
-});
-
-        }
-      });
-    }
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const start = Math.max(1, this.currentPage - 2);
+    const end   = Math.min(this.totalPages, this.currentPage + 2);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
   }
 
-  getTypeColor(type: string): string {
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize  = event.pageSize;
+    this.loadTransactions();
+  }
+
+  // ── Display helpers (called from template) ────────────────────────────────
+
+  /** Backend returns account as nested { id, name } object */
+  getAccountName(transaction: any): string {
+    return transaction?.account?.name ?? '—';
+  }
+
+  /** Backend returns category as nested { id, name } object */
+  getCategoryName(transaction: any): string {
+    return transaction?.category?.name ?? '—';
+  }
+
+  formatType(type: string): string {
     switch (type) {
-      case 'EXPENSE':
-        return 'warn';
-      case 'MONEY_GIVEN':
-        return 'accent';
-      case 'MONEY_TAKEN':
-        return 'primary';
-      default:
-        return '';
+      case 'EXPENSE':     return 'Expense';
+      case 'MONEY_GIVEN': return 'Money Given';
+      case 'MONEY_TAKEN': return 'Money Taken';
+      default:            return type;
     }
   }
 
-  getTypeLabel(type: string): string {
-    switch (type) {
-      case 'EXPENSE':
-        return 'Expense';
-      case 'MONEY_GIVEN':
-        return 'Money Given';
-      case 'MONEY_TAKEN':
-        return 'Money Taken';
-      default:
-        return type;
-    }
-  }
-  startEdit(tx: any) {
-
-  // prevent editing another row
-  if (this.editingId !== null && this.editingId !== tx.id) {
-    this.snackBar.open('Finish editing current row first', 'Close', {
-  duration: 3000,
-  horizontalPosition: 'right',
-  verticalPosition: 'top'
-});
-
-    return;
+  isNegativeTransaction(type: string): boolean {
+    return type === 'EXPENSE' || type === 'MONEY_GIVEN';
   }
 
-  this.editingId = tx.id;
-  this.editData = { ...tx };
-}
-
-
-cancelEdit() {
-  this.editingId = null;
-  this.editData = {};
-}
-
-saveEdit() {
-
-  if (!this.editingId) return;
-
-  if (!this.editData.amount || !this.editData.account?.id) {
-    this.snackBar.open('Amount and account are required', 'Close', {
-  duration: 3000,
-  horizontalPosition: 'right',
-  verticalPosition: 'top'
-});
-
-    return;
+  isPositiveTransaction(type: string): boolean {
+    return type === 'MONEY_TAKEN';
   }
 
-  const payload = {
-    amount: this.editData.amount,
-    description: this.editData.description,
-    transactionDate: this.editData.transactionDate,
-    accountId: this.editData.account?.id,
-    categoryId: this.editData.category?.id,
-    personId: this.editData.person?.id,
-    type: this.editData.type
-  };
-
-  this.transactionService
-    .updateTransaction(this.editingId, payload)
-    .subscribe(() => {
-      this.editingId = null;
-      this.loadTransactions();
+  formatAmount(transaction: any): string {
+    const prefix = this.isNegativeTransaction(transaction.type) ? '-' : '+';
+    const absVal = Math.abs(transaction.amount ?? 0);
+    const formatted = absVal.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
-}
-@HostListener('document:keydown.escape')
-onEsc() {
-  this.cancelEdit();
-}
-
-
-
+    return `${prefix}₹${formatted}`;
+  }
 
   getAmountClass(transaction: Transaction): string {
     return transaction.type === 'MONEY_TAKEN' ? 'positive' : 'negative';
+  }
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+
+  editTransaction(id: number): void {
+    this.router.navigate(['/transactions', id, 'edit']);
+  }
+
+  deleteTransaction(id: number): void {
+    if (!confirm('Are you sure you want to delete this transaction?')) return;
+
+    this.transactionService.delete(id).subscribe({
+      next: () => this.loadTransactions(),
+      error: (err: any) => {
+        console.error('Delete failed:', err);
+        this.snackBar.open('Failed to delete transaction', 'Close', {
+          duration: 3000, horizontalPosition: 'right', verticalPosition: 'top'
+        });
+      }
+    });
+  }
+
+  exportToCSV(): void {
+    const rows = [
+      ['Date', 'Type', 'Description', 'Account', 'Category', 'Amount'],
+      ...this.transactions.map((tx: any) => [
+        tx.transactionDate ?? '',
+        tx.type ?? '',
+        tx.description ?? '',
+        tx.account?.name ?? '',
+        tx.category?.name ?? '',
+        tx.amount ?? 0
+      ])
+    ];
+
+    const csv  = rows.map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Inline edit ───────────────────────────────────────────────────────────
+
+  startEdit(tx: any): void {
+    if (this.editingId !== null && this.editingId !== tx.id) {
+      this.snackBar.open('Finish editing current row first', 'Close', { duration: 3000 });
+      return;
+    }
+    this.editingId = tx.id;
+    this.editData  = { ...tx };
+  }
+
+  cancelEdit(): void {
+    this.editingId = null;
+    this.editData  = {};
+  }
+
+  saveEdit(): void {
+    if (!this.editingId) return;
+
+    const payload = {
+      amount:          this.editData.amount,
+      description:     this.editData.description,
+      transactionDate: this.editData.transactionDate,
+      accountId:       this.editData.account?.id,
+      categoryId:      this.editData.category?.id,
+      personId:        this.editData.person?.id,
+      type:            this.editData.type
+    };
+
+    this.transactionService.updateTransaction(this.editingId, payload).subscribe({
+      next: () => {
+        this.editingId = null;
+        this.loadTransactions();
+      },
+      error: (err: any) => {
+        console.error('Save edit failed:', err);
+        this.snackBar.open('Failed to save changes', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  @HostListener('document:keydown.escape')
+  onEsc(): void {
+    this.cancelEdit();
+  }
+
+  // ── Private helpers ───────────────────────────────────────────────────────
+
+  private formatDate(date: Date | string | null): string {
+    if (!date) return '';
+    const d     = new Date(date);
+    const year  = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day   = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

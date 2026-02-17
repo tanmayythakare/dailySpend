@@ -72,8 +72,8 @@
             name="account"
             [(ngModel)]="transactionData.accountId"
             required>
-            <option value="" disabled>Select an account</option>
-            <option *ngFor="let account of accounts" [value]="account.id">
+            <option [ngValue]="null" disabled>Select an account</option>
+            <option *ngFor="let account of accounts" [ngValue]="account.id">
               {{ account.name }} ({{ formatCurrency(account.balance) }})
             </option>
           </select>
@@ -91,24 +91,22 @@
             [(ngModel)]="transactionData.amount"
             placeholder="0.00"
             step="0.01"
-            min="0"
+            min="0.01"
             required
           />
         </div>
 
       </div>
 
-      <!-- Category (only for EXPENSE) -->
+      <!-- Category (only for EXPENSE) — binds to categoryId (number) -->
       <div class="form-group" *ngIf="transactionData.type === 'EXPENSE'">
-        <label for="category">
-          Category
-        </label>
+        <label for="category">Category</label>
         <select
           id="category"
           name="category"
-          [(ngModel)]="transactionData.category">
-          <option value="">Select a category</option>
-          <option *ngFor="let category of categories" [value]="category.name">
+          [(ngModel)]="transactionData.categoryId">
+          <option [ngValue]="null">Select a category (optional)</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">
             {{ category.name }}
           </option>
         </select>
@@ -124,8 +122,8 @@
           name="person"
           [(ngModel)]="transactionData.personId"
           required>
-          <option value="" disabled>Select a person</option>
-          <option *ngFor="let person of people" [value]="person.id">
+          <option [ngValue]="null" disabled>Select a person</option>
+          <option *ngFor="let person of people" [ngValue]="person.id">
             {{ person.name }}
           </option>
         </select>
@@ -147,9 +145,7 @@
 
       <!-- Description -->
       <div class="form-group">
-        <label for="description">
-          Description
-        </label>
+        <label for="description">Description</label>
         <textarea
           id="description"
           name="description"

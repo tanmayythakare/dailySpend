@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AccountService } from '../../core/services/account.service';
+import { Account } from '../../models/account.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,10 +14,10 @@ import { AccountService } from '../../core/services/account.service';
 })
 export class DashboardComponent implements OnInit {
 
-  accounts: any[] = [];
+  accounts: Account[] = [];
   loading = false;
   creating = false;
-  
+
   successMessage = '';
   errorMessage = '';
 
@@ -43,12 +44,12 @@ export class DashboardComponent implements OnInit {
     this.errorMessage = '';
 
     this.accountService.getAllAccounts().subscribe({
-      next: (accounts) => {
+      next: (accounts: Account[]) => {
         this.accounts = accounts;
         this.calculateTotalBalance();
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading accounts:', error);
         this.errorMessage = 'Failed to load accounts. Please try again.';
         this.loading = false;
@@ -57,18 +58,16 @@ export class DashboardComponent implements OnInit {
   }
 
   calculateTotalBalance(): void {
-    this.totalBalance = this.accounts.reduce((sum, account) => {
-      return sum + (account.balance || 0);
+    this.totalBalance = this.accounts.reduce((sum: number, account: Account) => {
+      return sum + (account.balance ?? 0);
     }, 0);
   }
 
   createAccount(): void {
-    // Validation
     if (!this.newAccountName.trim()) {
       this.errorMessage = 'Please enter an account name';
       return;
     }
-
     if (!this.newAccountType) {
       this.errorMessage = 'Please select an account type';
       return;
@@ -85,24 +84,16 @@ export class DashboardComponent implements OnInit {
     };
 
     this.accountService.createAccount(newAccount).subscribe({
-      next: (account) => {
+      next: (account: any) => {
         this.successMessage = `Account "${account.name}" created successfully!`;
-        
-        // Reset form
-        this.newAccountName = '';
+        this.newAccountName    = '';
         this.newAccountBalance = 0;
-        this.newAccountType = '';
-        
-        // Reload accounts
+        this.newAccountType    = '';
         this.loadAccounts();
         this.creating = false;
-
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+        setTimeout(() => { this.successMessage = ''; }, 3000);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error creating account:', error);
         this.errorMessage = error.error?.message || 'Failed to create account. Please try again.';
         this.creating = false;
@@ -119,13 +110,9 @@ export class DashboardComponent implements OnInit {
       next: () => {
         this.successMessage = 'Account deleted successfully!';
         this.loadAccounts();
-
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = '';
-        }, 3000);
+        setTimeout(() => { this.successMessage = ''; }, 3000);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error deleting account:', error);
         this.errorMessage = 'Failed to delete account. Please try again.';
       }
@@ -136,17 +123,13 @@ export class DashboardComponent implements OnInit {
     this.router.navigate(['/accounts', accountId]);
   }
 
-  formatCurrency(value: number): string {
-    if (value === undefined || value === null) {
-      return '₹0.00';
-    }
-    
+  formatCurrency(value: number | undefined | null): string {
+    if (value === undefined || value === null) return '₹0.00';
     const absValue = Math.abs(value);
     const formatted = absValue.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
-    
     return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
   }
 }

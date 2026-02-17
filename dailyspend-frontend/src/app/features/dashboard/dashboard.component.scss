@@ -1,465 +1,300 @@
-/* ========================================
-   TRANSACTION LIST - Journal Style
-   ======================================== */
+/* ═══════════════════════════════════════════════════════════════
+   Dashboard — targets existing HTML class names exactly
+═══════════════════════════════════════════════════════════════ */
 
-.transaction-list-container {
-  max-width: 1200px;
-  margin: 0 auto;
+.dashboard-container {
+  max-width: 100%;
+  animation: pageFadeIn 250ms ease both;
 }
 
-/* -------- Header Section -------- */
-
-.list-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-xl);
-  gap: var(--space-md);
-  flex-wrap: wrap;
+@keyframes pageFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Page Title ───────────────────────────────────────────────── */
 .page-title {
-  font-size: 32px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+  letter-spacing: -0.4px;
+  margin-bottom: 24px;
 }
 
-.header-actions {
-  display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
+/* ── Messages ─────────────────────────────────────────────────── */
+.messages {
+  margin-bottom: 16px;
+
+  .success {
+    background: var(--positive-bg);
+    color: var(--positive-text);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .error {
+    background: var(--negative-bg);
+    color: var(--negative-text);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
 }
 
-.btn-filter,
-.btn-export,
-.btn-add {
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  border: none;
+/* ── Net Worth Card ───────────────────────────────────────────── */
+/* Moved to TOP visually via order — we style it as the hero card */
+.net-worth-card {
+  background: var(--brand-gradient);
+  border-radius: 20px;
+  padding: 24px 32px;
+  color: #fff;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 32px rgba(124,58,237,0.30), 0 2px 8px rgba(124,58,237,0.20);
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
-  gap: var(--space-xs);
-}
-
-.btn-filter {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-light);
-}
-
-.btn-filter:hover {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-}
-
-.btn-export {
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-light);
-}
-
-.btn-export:hover {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-}
-
-.btn-add {
-  background: var(--primary-gradient);
-  color: white;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-add:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
-}
-
-/* ========================================
-   FILTER PANEL
-   ======================================== */
-
-.filter-panel {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: var(--space-xl);
-  margin-bottom: var(--space-xl);
-  box-shadow: var(--shadow-sm);
-}
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-
-.filter-actions {
-  display: flex;
-  gap: var(--space-md);
-  justify-content: flex-end;
-}
-
-.btn-clear {
-  padding: 10px 20px;
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.btn-clear:hover {
-  background: var(--bg-subtle);
-}
-
-/* ========================================
-   TRANSACTIONS TABLE - LEDGER STYLE
-   ======================================== */
-
-.transactions-wrapper {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-.transactions-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
-.transactions-table thead {
-  background: var(--bg-subtle);
-}
-
-.transactions-table thead th {
-  padding: 16px 20px;
-  text-align: left;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.transactions-table thead th:last-child {
-  text-align: right;
-}
-
-.transactions-table tbody tr {
-  border-bottom: 1px solid var(--border-light);
-  transition: background-color var(--transition-fast);
-}
-
-.transactions-table tbody tr:last-child {
-  border-bottom: none;
-}
-
-.transactions-table tbody tr:hover {
-  background: var(--bg-hover);
-}
-
-.transactions-table tbody td {
-  padding: 20px;
-  font-size: 15px;
-  color: var(--text-primary);
-}
-
-/* -------- Date Column -------- */
-
-.date-cell {
-  color: var(--text-secondary);
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-/* -------- Type Badge -------- */
-
-.type-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.type-badge.expense {
-  background: var(--danger-light);
-  color: var(--danger);
-}
-
-.type-badge.income {
-  background: var(--success-light);
-  color: var(--success);
-}
-
-.type-badge.money-given {
-  background: var(--warning-light);
-  color: var(--warning);
-}
-
-.type-badge.money-taken {
-  background: var(--success-light);
-  color: var(--success);
-}
-
-/* -------- Description -------- */
-
-.description-cell {
-  max-width: 300px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* -------- Account & Category -------- */
-
-.account-cell,
-.category-cell {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-/* -------- Amount Column -------- */
-
-.amount-cell {
-  text-align: right;
-  font-weight: 600;
-  font-size: 16px;
-  white-space: nowrap;
-}
-
-.amount-positive {
-  color: var(--success);
-}
-
-.amount-negative {
-  color: var(--danger);
-}
-
-/* -------- Actions Column -------- */
-
-.actions-cell {
-  text-align: right;
-}
-
-.action-btn {
-  padding: 8px 12px;
-  background: transparent;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  margin-left: var(--space-xs);
-}
-
-.action-btn:hover {
-  background: var(--bg-subtle);
-  border-color: var(--border-medium);
-  color: var(--text-primary);
-}
-
-.action-btn.delete:hover {
-  background: var(--danger-light);
-  border-color: var(--danger);
-  color: var(--danger);
-}
-
-/* ========================================
-   PAGINATION
-   ======================================== */
-
-.pagination {
-  display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--space-lg);
-  background: var(--bg-card);
-  border-top: 1px solid var(--border-light);
-}
+  order: -1; /* visually first if in flex */
 
-.pagination-info {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
+  /* Decorative blobs */
+  &::after {
+    content: '';
+    position: absolute;
+    right: -50px;
+    top: -50px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    pointer-events: none;
+  }
+  &::before {
+    content: '';
+    position: absolute;
+    right: 30px;
+    bottom: -40px;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    pointer-events: none;
+  }
 
-.pagination-controls {
-  display: flex;
-  gap: var(--space-xs);
-}
+  h2 {
+    font-size: 13px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    opacity: 0.85;
+    color: #fff;
+    margin-bottom: 8px;
+  }
 
-.pagination-btn {
-  padding: 8px 16px;
-  background: transparent;
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  color: var(--text-secondary);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
-
-.pagination-btn:hover:not(:disabled) {
-  background: var(--bg-subtle);
-  color: var(--text-primary);
-}
-
-.pagination-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pagination-btn.active {
-  background: var(--primary);
-  color: white;
-  border-color: var(--primary);
-}
-
-/* ========================================
-   EMPTY STATE
-   ======================================== */
-
-.empty-state {
-  text-align: center;
-  padding: var(--space-2xl);
-  color: var(--text-tertiary);
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-}
-
-.empty-icon {
-  font-size: 64px;
-  margin-bottom: var(--space-md);
-  opacity: 0.3;
-}
-
-.empty-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-sm);
-}
-
-.empty-text {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  margin-bottom: var(--space-lg);
-}
-
-/* ========================================
-   LOADING STATE
-   ======================================== */
-
-.loading-state {
-  text-align: center;
-  padding: var(--space-2xl);
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--border-light);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin: 0 auto var(--space-md);
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+  h1 {
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -1.2px;
+    color: #fff;
+    font-family: var(--font-mono);
+    line-height: 1;
   }
 }
 
-/* ========================================
-   RESPONSIVE
-   ======================================== */
+/* ── Create Account Card ──────────────────────────────────────── */
+.create-account-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  padding: 20px 24px;
+  margin-bottom: 24px;
 
-@media (max-width: 1024px) {
-  .transactions-table {
-    display: block;
-    overflow-x: auto;
+  h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+    letter-spacing: -0.2px;
   }
 }
 
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 24px;
-  }
+/* ── Form Grid ────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 12px;
+  align-items: end;
 
-  .header-actions {
-    width: 100%;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr 1fr;
   }
-
-  .btn-filter,
-  .btn-export,
-  .btn-add {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .filter-panel {
-    padding: var(--space-lg);
-  }
-
-  .filter-grid {
+  @media (max-width: 560px) {
     grid-template-columns: 1fr;
   }
 
-  .transactions-table thead {
-    display: none;
+  input, select {
+    height: 38px;
+    padding: 0 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--gray-800);
+    background: #fff;
+    outline: none;
+    width: 100%;
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+
+    &:focus {
+      border-color: var(--brand-400);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+    }
+
+    &::placeholder { color: var(--gray-400); }
   }
 
-  .transactions-table tbody tr {
-    display: block;
-    margin-bottom: var(--space-md);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius-md);
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
   }
 
-  .transactions-table tbody td {
-    display: block;
-    text-align: left !important;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  .transactions-table tbody td:last-child {
-    border-bottom: none;
-  }
-
-  .transactions-table tbody td::before {
-    content: attr(data-label);
-    display: block;
-    font-size: 12px;
+  button {
+    height: 38px;
+    padding: 0 20px;
+    background: var(--brand-600);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
     font-weight: 600;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    margin-bottom: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.30);
+    transition: all 200ms ease;
+
+    &:hover:not(:disabled) {
+      background: var(--brand-700);
+      box-shadow: 0 4px 14px rgba(124,58,237,0.40);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+/* ── Accounts Grid ────────────────────────────────────────────── */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── Account Card ─────────────────────────────────────────────── */
+.account-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+  animation: cardIn 300ms ease both;
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
   }
 
-  .pagination {
-    flex-direction: column;
-    gap: var(--space-md);
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) { animation-delay: #{($i - 1) * 60}ms; }
   }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    margin-bottom: 8px;
+
+    span {
+      color: var(--gray-500);
+    }
+
+    strong {
+      font-weight: 600;
+      color: var(--gray-800);
+      font-family: var(--font-mono);
+    }
+  }
+
+  button {
+    width: 100%;
+    margin-top: 16px;
+    padding: 8px;
+    background: #fff;
+    color: var(--negative);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 200ms ease;
+
+    &:hover {
+      background: var(--negative-bg);
+      border-color: var(--negative);
+    }
+  }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Loading / Empty ──────────────────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: var(--gray-500);
+  font-size: 14px;
+}
+
+.empty {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,0.05);
+  padding: 48px 24px;
+  text-align: center;
+  margin-top: 8px;
 }

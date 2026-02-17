@@ -1,11 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
-import { TransactionFormComponent } from './features/transactions/transaction-form/transaction-form.component';
-import { TransactionsComponent } from './features/transactions/transactions/transactions.component';
 
 export const routes: Routes = [
 
-  // Public routes
+  // ── Public routes ─────────────────────────────────────────────────────────
   {
     path: 'login',
     loadComponent: () =>
@@ -19,7 +17,7 @@ export const routes: Routes = [
         .then(m => m.RegisterComponent)
   },
 
-  // Protected routes
+  // ── Protected routes (inside Shell) ──────────────────────────────────────
   {
     path: '',
     canActivate: [authGuard],
@@ -27,26 +25,35 @@ export const routes: Routes = [
       import('./layout/shell/shell.component')
         .then(m => m.ShellComponent),
     children: [
+
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+
       {
         path: 'dashboard',
         loadComponent: () =>
           import('./features/dashboard/dashboard.component')
             .then(m => m.DashboardComponent)
       },
+
       {
         path: 'accounts/:id',
         loadComponent: () =>
           import('./features/accounts/account-detail/account-detail.component')
             .then(m => m.AccountDetailComponent)
       },
+
+      // ── Transactions — order matters: /new before /:id ──────────────────
       {
         path: 'transactions',
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/transactions/transaction-list/transaction-list.component')
             .then(m => m.TransactionListComponent)
-      }
-      ,
+      },
       {
         path: 'transactions/new',
         canActivate: [authGuard],
@@ -55,42 +62,38 @@ export const routes: Routes = [
             .then(m => m.TransactionFormComponent)
       },
       {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
+        path: 'transactions/:id/edit',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/transactions/transaction-form/transaction-form.component')
+            .then(m => m.TransactionFormComponent)
+      },
+
+      // ── People ───────────────────────────────────────────────────────────
+      {
+        path: 'people',
+        loadComponent: () =>
+          import('./features/people/people-list/people-list.component')
+            .then(m => m.PeopleListComponent)
       },
       {
-  path: 'transactions',
-  component: TransactionsComponent,
-  canActivate: [authGuard]
-},{
-  path: 'people',
-  loadComponent: () =>
-    import('./features/people/people-list/people-list.component')
-      .then(m => m.PeopleListComponent)
-},{
-  path: 'people/:id',
-  loadComponent: () =>
-    import('./features/people/person-detail/person-detail.component')
-      .then(m => m.PersonDetailComponent)
-},{
-  path: 'reports',
-  loadComponent: () =>
-    import('./features/reports/reports.component')
-      .then(m => m.ReportsComponent)
-}
-,
-{
-  path: 'transactions/new',
-  component: TransactionFormComponent,
-  canActivate: [authGuard]
-}
+        path: 'people/:id',
+        loadComponent: () =>
+          import('./features/people/person-detail/person-detail.component')
+            .then(m => m.PersonDetailComponent)
+      },
 
-
+      // ── Reports ──────────────────────────────────────────────────────────
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('./features/reports/reports.component')
+            .then(m => m.ReportsComponent)
+      }
     ]
   },
 
-
+  // ── Catch-all ─────────────────────────────────────────────────────────────
   {
     path: '**',
     redirectTo: 'login'

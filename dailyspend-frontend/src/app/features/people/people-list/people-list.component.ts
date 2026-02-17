@@ -2,18 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { PersonService } from '../../core/services/person.service';
-
-// Person model with all required fields
-export interface Person {
-  id?: number;
-  name: string;
-  userId?: number;
-  balance?: number;
-  transactionCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { PersonService } from '../../../core/services/person.service';
+import { Person } from '../../../models/person.model';
 
 @Component({
   selector: 'app-people-list',
@@ -28,8 +18,7 @@ export class PeopleListComponent implements OnInit {
   loading = false;
   errorMessage = '';
   successMessage = '';
-  
-  // Add person form
+
   showAddForm = false;
   newPersonName = '';
 
@@ -47,11 +36,11 @@ export class PeopleListComponent implements OnInit {
     this.errorMessage = '';
 
     this.personService.getAllPeople().subscribe({
-      next: (data) => {
+      next: (data: Person[]) => {
         this.people = data;
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading people:', error);
         this.errorMessage = 'Failed to load people. Please try again.';
         this.loading = false;
@@ -69,18 +58,14 @@ export class PeopleListComponent implements OnInit {
     this.errorMessage = '';
     this.successMessage = '';
 
-    const newPerson: Person = {
-      name: this.newPersonName.trim()
-    };
-
-    this.personService.createPerson(newPerson).subscribe({
-      next: (person) => {
+    this.personService.createPerson({ name: this.newPersonName.trim() }).subscribe({
+      next: (person: Person) => {
         this.successMessage = `${person.name} added successfully!`;
         this.newPersonName = '';
         this.showAddForm = false;
         this.loadPeople();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error adding person:', error);
         this.errorMessage = 'Failed to add person. Please try again.';
         this.loading = false;
@@ -89,9 +74,7 @@ export class PeopleListComponent implements OnInit {
   }
 
   deletePerson(personId: number): void {
-    if (!confirm('Are you sure you want to delete this person? All associated transactions will also be removed.')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to delete this person?')) return;
 
     this.loading = true;
     this.errorMessage = '';
@@ -102,9 +85,9 @@ export class PeopleListComponent implements OnInit {
         this.successMessage = 'Person deleted successfully!';
         this.loadPeople();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error deleting person:', error);
-        this.errorMessage = 'Failed to delete person. Please try again.';
+        this.errorMessage = error.error?.message || 'Failed to delete person. Please try again.';
         this.loading = false;
       }
     });
@@ -114,28 +97,32 @@ export class PeopleListComponent implements OnInit {
     this.router.navigate(['/people', personId]);
   }
 
+  /**
+   * Safely unwrap person.balance (typed as optional in the model).
+   * Angular strict template checking forbids direct comparisons with undefined.
+   * Always returns a number — use this in all template comparisons.
+   */
+  getBalance(person: Person): number {
+    return person.balance ?? 0;
+  }
+
   getInitials(name: string): string {
     if (!name) return '?';
-    
     return name
       .split(' ')
-      .map(word => word[0])
+      .map((word: string) => word[0])
       .join('')
       .toUpperCase()
       .substring(0, 2);
   }
 
-  formatCurrency(value: number): string {
-    if (value === undefined || value === null) {
-      return '₹0.00';
-    }
-    
+  formatCurrency(value: number | undefined | null): string {
+    if (value === undefined || value === null) return '₹0.00';
     const absValue = Math.abs(value);
     const formatted = absValue.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
-    
     return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
   }
 }

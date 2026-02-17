@@ -10,15 +10,29 @@ export class AccountService {
 
   constructor(private api: ApiService) {}
 
+  // ── Core methods (used by transaction-list) ──────────────────────────────
   getAll(): Observable<Account[]> {
     return this.api.get<Account[]>('/v1/accounts');
   }
 
-  create(account: { name: string; type: string; balance?: number }) {
-    return this.api.post('/v1/accounts', account);
+  create(account: { name: string; type: string; balance?: number }): Observable<Account> {
+    return this.api.post<Account>('/v1/accounts', account);
   }
-  delete(id: number) {
-  return this.api.delete(`/v1/accounts/${id}`);
-}
 
+  delete(id: number): Observable<void> {
+    return this.api.delete<void>(`/v1/accounts/${id}`);
+  }
+
+  // ── Aliases used by dashboard & transaction-form ─────────────────────────
+  getAllAccounts(): Observable<Account[]> {
+    return this.getAll();
+  }
+
+  createAccount(account: { name: string; type: string; balance?: number }): Observable<Account> {
+    return this.create(account);
+  }
+
+  deleteAccount(id: number): Observable<void> {
+    return this.delete(id);
+  }
 }

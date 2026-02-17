@@ -21,7 +21,6 @@
         name="personName"
         required
       />
-
       <button type="submit" [disabled]="!newPersonName || loading">
         {{ loading ? 'Adding...' : 'Add Person' }}
       </button>
@@ -29,13 +28,8 @@
   </div>
 
   <!-- Messages -->
-  <div class="error-message" *ngIf="errorMessage">
-    {{ errorMessage }}
-  </div>
-
-  <div class="success-message" *ngIf="successMessage">
-    {{ successMessage }}
-  </div>
+  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
   <!-- Loading State -->
   <div class="loading-state" *ngIf="loading && !people.length">
@@ -62,18 +56,25 @@
 
       <div class="person-balance">
         <span class="balance-label">Balance</span>
-        <span class="balance-amount"
-              [class.positive]="person.balance > 0"
-              [class.negative]="person.balance < 0"
-              [class.zero]="person.balance === 0">
+
+        <!--
+          NG2 FIX: person.balance is typed as optional (balance?: number).
+          Angular strict checking forbids comparing undefined to a number directly.
+          getBalance(person) always returns a number (0 when undefined).
+        -->
+        <span
+          class="balance-amount"
+          [class.positive]="getBalance(person) > 0"
+          [class.negative]="getBalance(person) < 0"
+          [class.zero]="getBalance(person) === 0">
           {{ formatCurrency(person.balance) }}
         </span>
       </div>
 
       <div class="balance-hint">
-        <span *ngIf="person.balance > 0">They owe you</span>
-        <span *ngIf="person.balance < 0">You owe them</span>
-        <span *ngIf="person.balance === 0">All settled up</span>
+        <span *ngIf="getBalance(person) > 0">They owe you</span>
+        <span *ngIf="getBalance(person) < 0">You owe them</span>
+        <span *ngIf="getBalance(person) === 0">All settled up</span>
       </div>
 
       <div class="person-actions">
@@ -93,12 +94,9 @@
   <div class="empty-state" *ngIf="!loading && people.length === 0">
     <div class="empty-icon">👥</div>
     <h3 class="empty-title">No people yet</h3>
-    <p class="empty-text">
-      Add people to track money you've given or taken
-    </p>
+    <p class="empty-text">Add people to track money you've given or taken</p>
     <button class="btn-add" (click)="showAddForm = true" *ngIf="!showAddForm">
       Add First Person
     </button>
   </div>
-
 </div>
