@@ -1,9 +1,83 @@
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--surface-bg);
+}
+
+/* ── Sidebar ───────────────────────────── */
+.sidebar {
+  width: 240px;
+  background: var(--surface-card);
+  border-right: 1px solid var(--gray-200);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.app-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand-600);
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--gray-600);
+  font-weight: 500;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-links a:hover {
+  background: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.nav-links a.active {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  font-weight: 600;
+}
+
+/* ── Content ───────────────────────────── */
+.content {
+  flex: 1;
+  padding: var(--space-6);
+  overflow-x: hidden;
+}
+
+/* ── Responsive ────────────────────────── */
+@media (max-width: 900px) {
+  .app-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--gray-200);
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-links {
+    flex-direction: row;
+  }
+}
+
+/* ── Global Loader ─────────────────────── */
 .global-loader {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(255,255,255,0.6);
   backdrop-filter: blur(4px);
   display: flex;

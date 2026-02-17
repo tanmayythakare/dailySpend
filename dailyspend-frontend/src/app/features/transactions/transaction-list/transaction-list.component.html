@@ -81,7 +81,8 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let transaction of transactions">
+        <tr *ngFor="let transaction of transactions; trackBy: trackByTransaction"
+>
 
           <td class="date-cell" data-label="Date">
             {{ transaction.transactionDate | date: 'MMM d, yyyy' }}
@@ -146,7 +147,7 @@
         <button
           class="pagination-btn"
           [class.active]="currentPage === page"
-          *ngFor="let page of getPageNumbers()"
+          *ngFor="let page of pageNumbers; trackBy: trackByPage"
           (click)="goToPage(page)">
           {{ page }}
         </button>

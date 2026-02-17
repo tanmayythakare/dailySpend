@@ -14,11 +14,11 @@
   <div class="form-card">
 
     <!-- Messages -->
-    <div class="error-message" *ngIf="errorMessage">
+    <div class="error-message" *ngIf="errorMessage" role="alert">
       {{ errorMessage }}
     </div>
 
-    <div class="success-message" *ngIf="successMessage">
+    <div class="success-message" *ngIf="successMessage" role="alert">
       {{ successMessage }}
     </div>
 
@@ -30,6 +30,8 @@
         <button
           type="button"
           class="type-btn"
+          role="button"
+          [attr.aria-pressed]="transactionData.type === 'EXPENSE'"
           [class.active]="transactionData.type === 'EXPENSE'"
           (click)="selectType('EXPENSE')">
           <div class="type-btn-icon">💸</div>
@@ -39,6 +41,8 @@
         <button
           type="button"
           class="type-btn"
+          role="button"
+          [attr.aria-pressed]="transactionData.type === 'MONEY_GIVEN'"
           [class.active]="transactionData.type === 'MONEY_GIVEN'"
           (click)="selectType('MONEY_GIVEN')">
           <div class="type-btn-icon">➡️</div>
@@ -48,6 +52,8 @@
         <button
           type="button"
           class="type-btn"
+          role="button"
+          [attr.aria-pressed]="transactionData.type === 'MONEY_TAKEN'"
           [class.active]="transactionData.type === 'MONEY_TAKEN'"
           (click)="selectType('MONEY_TAKEN')">
           <div class="type-btn-icon">⬅️</div>
@@ -73,9 +79,12 @@
             [(ngModel)]="transactionData.accountId"
             required>
             <option [ngValue]="null" disabled>Select an account</option>
-            <option *ngFor="let account of accounts" [ngValue]="account.id">
-              {{ account.name }} ({{ formatCurrency(account.balance) }})
-            </option>
+            <option
+  *ngFor="let account of accounts; trackBy: trackById"
+  [ngValue]="account.id">
+  {{ account.name }} ({{ formatCurrency(account.balance) }})
+</option>
+
           </select>
         </div>
 
@@ -98,7 +107,7 @@
 
       </div>
 
-      <!-- Category (only for EXPENSE) — binds to categoryId (number) -->
+      <!-- Category -->
       <div class="form-group" *ngIf="transactionData.type === 'EXPENSE'">
         <label for="category">Category</label>
         <select
@@ -106,13 +115,13 @@
           name="category"
           [(ngModel)]="transactionData.categoryId">
           <option [ngValue]="null">Select a category (optional)</option>
-          <option *ngFor="let category of categories" [ngValue]="category.id">
+          <option *ngFor="let category of categories; trackBy: trackById" [ngValue]="category.id">
             {{ category.name }}
           </option>
         </select>
       </div>
 
-      <!-- Person (for MONEY_GIVEN and MONEY_TAKEN) -->
+      <!-- Person -->
       <div class="form-group" *ngIf="transactionData.type !== 'EXPENSE'">
         <label for="person">
           Person <span class="required">*</span>
@@ -123,7 +132,7 @@
           [(ngModel)]="transactionData.personId"
           required>
           <option [ngValue]="null" disabled>Select a person</option>
-          <option *ngFor="let person of people" [ngValue]="person.id">
+          <option *ngFor="let person of people; trackBy: trackById" [ngValue]="person.id">
             {{ person.name }}
           </option>
         </select>

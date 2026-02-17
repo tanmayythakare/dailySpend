@@ -19,13 +19,12 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
- register(request: RegisterRequest): Observable<void> {
-  return this.http.post<void>(
-    `${environment.apiBaseUrl}/auth/register`,
-    request
-  );
-}
-
+  register(request: RegisterRequest): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiBaseUrl}/auth/register`,
+      request
+    );
+  }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(
@@ -48,8 +47,13 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+
+    return !this.isTokenExpired(token);
   }
+
+  // ───────── PRIVATE HELPERS ─────────
 
   private storeToken(token: string): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -60,6 +64,18 @@ export class AuthService {
   private clearToken(): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem(this.TOKEN_KEY);
+    }
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (!payload.exp) return false;
+
+      const expiry = payload.exp * 1000;
+      return Date.now() > expiry;
+    } catch {
+      return true; // malformed token treated as invalid
     }
   }
 }

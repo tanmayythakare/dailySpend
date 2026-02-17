@@ -1,0 +1,21 @@
+.account-detail-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.account-card {
+  padding: var(--space-6);
+}
+
+.account-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-6);
+}
+
+@media (max-width: 600px) {
+  .account-meta {
+    grid-template-columns: 1fr;
+  }
+}

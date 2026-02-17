@@ -9,9 +9,13 @@
     </div>
 
     <!-- Error Message -->
-    <div class="error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
+    <div class="error-message"
+     *ngIf="errorMessage"
+     role="alert"
+     aria-live="assertive">
+  {{ errorMessage }}
+</div>
+
 
     <!-- Login Form -->
     <form class="login-form" (ngSubmit)="onSubmit()">
@@ -43,12 +47,13 @@
       </div>
 
       <button
-        type="submit"
-        class="submit-btn"
-        [disabled]="loading"
-      >
-        {{ loading ? 'Signing in...' : 'Sign In' }}
-      </button>
+  type="submit"
+  class="submit-btn"
+  [disabled]="loading">
+  <span *ngIf="!loading">Sign In</span>
+  <span *ngIf="loading">Signing in...</span>
+</button>
+
 
     </form>
 

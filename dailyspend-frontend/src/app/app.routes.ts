@@ -3,13 +3,13 @@ import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
 
+  // ───── Public Routes ─────
   {
     path: 'login',
     loadComponent: () =>
       import('./features/auth/login/login.component')
         .then(m => m.LoginComponent)
   },
-
   {
     path: 'register',
     loadComponent: () =>
@@ -17,10 +17,13 @@ export const routes: Routes = [
         .then(m => m.RegisterComponent)
   },
 
+  // ───── Protected Routes ─────
   {
     path: '',
-    canActivate: [authGuard],
+    canActivateChild: [authGuard],
     children: [
+
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
       {
         path: 'dashboard',
@@ -52,6 +55,6 @@ export const routes: Routes = [
 
     ]
   },
-
-  { path: '**', redirectTo: 'dashboard' }
+  // ───── Fallback ─────
+  { path: '**', redirectTo: '' }
 ];

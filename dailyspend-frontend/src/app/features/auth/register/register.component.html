@@ -9,14 +9,20 @@
     </div>
 
     <!-- Error Message -->
-    <div class="error-message" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
+    <div class="error-message"
+     *ngIf="errorMessage"
+     role="alert"
+     aria-live="assertive">
+  {{ errorMessage }}
+</div>
 
-    <!-- Success Message -->
-    <div class="success-message" *ngIf="successMessage">
-      {{ successMessage }}
-    </div>
+<div class="success-message"
+     *ngIf="successMessage"
+     role="status"
+     aria-live="polite">
+  {{ successMessage }}
+</div>
+
 
     <!-- Register Form -->
     <form class="register-form" (ngSubmit)="onSubmit()">

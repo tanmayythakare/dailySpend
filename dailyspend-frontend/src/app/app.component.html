@@ -1,15 +1,27 @@
 <div class="app-layout">
 
-  <aside class="sidebar">
-    <h2>DailySpend</h2>
+  <aside class="sidebar" role="navigation" aria-label="Main Navigation">
+    <h2 class="app-title">DailySpend</h2>
 
-    <a routerLink="/dashboard">Dashboard</a>
-    <a routerLink="/transactions">Transactions</a>
-    <a routerLink="/reports">Reports</a>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/transactions" routerLinkActive="active">Transactions</a>
+      <a routerLink="/reports" routerLinkActive="active">Reports</a>
+    </nav>
   </aside>
 
   <main class="content">
-    <router-outlet></router-outlet>
+    <div [@routeFade]="true">
+      <router-outlet></router-outlet>
+    </div>
   </main>
 
+</div>
+
+<!-- Global Loader -->
+<div class="global-loader" *ngIf="loading$ | async">
+  <mat-progress-spinner
+    mode="indeterminate"
+    diameter="50">
+  </mat-progress-spinner>
 </div>

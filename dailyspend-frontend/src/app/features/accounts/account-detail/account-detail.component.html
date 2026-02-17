@@ -1,8 +1,36 @@
-<h2>Account Details</h2>
-<div *ngIf="loading">Loading...</div>
-<div *ngIf="error">{{ error }}</div>
-<div *ngIf="account">
-  <p><strong>Name:</strong> {{ account.name }}</p>
-  <p><strong>Type:</strong> {{ account.type }}</p>
-  <p><strong>Balance:</strong> {{ formatCurrency(account.balance) }}</p>
+<div class="account-detail-container">
+
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading account details...</p>
+  </div>
+
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="account" class="account-card card">
+
+    <h2 class="text-xl font-semibold mb-4">
+      {{ account.name }}
+    </h2>
+
+    <div class="account-meta">
+      <div>
+        <span class="text-muted">Type</span>
+        <p class="text-base">{{ account.type }}</p>
+      </div>
+
+      <div>
+        <span class="text-muted">Balance</span>
+        <p class="amount amount--large"
+           [class.amount--positive]="account.balance >= 0"
+           [class.amount--negative]="account.balance < 0">
+          {{ formatCurrency(account.balance) }}
+        </p>
+      </div>
+    </div>
+
+  </div>
+
 </div>

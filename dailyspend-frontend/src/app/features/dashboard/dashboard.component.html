@@ -3,10 +3,17 @@
   <h1 class="page-title">Dashboard</h1>
 
   <!-- Messages -->
-  <div class="messages" *ngIf="successMessage || errorMessage">
-    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
-  </div>
+  <!-- Messages -->
+<div class="messages" *ngIf="successMessage || errorMessage">
+  <p class="success" *ngIf="successMessage" role="alert">
+    {{ successMessage }}
+  </p>
+
+  <p class="error" *ngIf="errorMessage" role="alert">
+    {{ errorMessage }}
+  </p>
+</div>
+
 
   <!-- Create Account Section -->
   <div class="create-account-card">
@@ -26,7 +33,7 @@
       />
 
       <select [(ngModel)]="newAccountType">
-        <option value="" disabled selected>Select type</option>
+        <option [ngValue]="''" disabled>Select type</option>
         <option *ngFor="let type of accountTypes" [value]="type">
           {{ type }}
         </option>
@@ -48,7 +55,8 @@
 
   <!-- Accounts Grid -->
   <div class="accounts-grid" *ngIf="!loading && accounts.length > 0">
-    <div class="account-card" *ngFor="let account of accounts">
+    <div class="account-card" *ngFor="let account of accounts; trackBy: trackByAccount">
+
       <h3>{{ account.name }}</h3>
 
       <p>

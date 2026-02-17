@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
 import { AccountService } from '../../core/services/account.service';
 import { Account } from '../../models/account.model';
 import { AnalyticsService } from '../../core/services/analytics.service';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -12,7 +15,9 @@ import { AnalyticsService } from '../../core/services/analytics.service';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
 
   accounts: Account[] = [];
   loading = false;
@@ -21,10 +26,10 @@ export class DashboardComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  // New account form data
   newAccountName = '';
   newAccountBalance = 0;
   newAccountType = '';
+
   income = 0;
   expense = 0;
   net = 0;
@@ -44,33 +49,53 @@ export class DashboardComponent implements OnInit {
     this.loadSummary();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  trackByAccount(_: number, account: Account): number {
+    return account.id!;
+  }
+
   loadAccounts(): void {
     this.loading = true;
     this.errorMessage = '';
 
-    this.accountService.getAllAccounts().subscribe({
-      next: (accounts: Account[]) => {
-        this.accounts = accounts;
-        this.calculateTotalBalance();
-        this.loading = false;
-      },
-      error: (error: any) => {
-        console.error('Error loading accounts:', error);
-        this.errorMessage = 'Failed to load accounts. Please try again.';
-        this.loading = false;
-      }
-    });
+    this.accountService.getAllAccounts()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (accounts: Account[]) => {
+          this.accounts = accounts;
+          this.calculateTotalBalance();
+          this.loading = false;
+        },
+        error: () => {
+          this.errorMessage = 'Failed to load accounts. Please try again.';
+          this.loading = false;
+        }
+      });
   }
-  loadSummary() {
-this.analytics.getIncome().subscribe(v => this.income = v);
-this.analytics.getExpense().subscribe(v => this.expense = v);
-this.analytics.getNet().subscribe(v => this.net = v);
-}
+
+  loadSummary(): void {
+    this.analytics.getIncome()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(v => this.income = v);
+
+    this.analytics.getExpense()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(v => this.expense = v);
+
+    this.analytics.getNet()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(v => this.net = v);
+  }
 
   calculateTotalBalance(): void {
-    this.totalBalance = this.accounts.reduce((sum: number, account: Account) => {
-      return sum + (account.balance ?? 0);
-    }, 0);
+    this.totalBalance = this.accounts.reduce(
+      (sum, account) => sum + (account.balance ?? 0),
+      0
+    );
   }
 
   createAccount(): void {
@@ -78,6 +103,7 @@ this.analytics.getNet().subscribe(v => this.net = v);
       this.errorMessage = 'Please enter an account name';
       return;
     }
+
     if (!this.newAccountType) {
       this.errorMessage = 'Please select an account type';
       return;
@@ -93,22 +119,28 @@ this.analytics.getNet().subscribe(v => this.net = v);
       type: this.newAccountType
     };
 
-    this.accountService.createAccount(newAccount).subscribe({
-      next: (account: any) => {
-        this.successMessage = `Account "${account.name}" created successfully!`;
-        this.newAccountName    = '';
-        this.newAccountBalance = 0;
-        this.newAccountType    = '';
-        this.loadAccounts();
-        this.creating = false;
-        setTimeout(() => { this.successMessage = ''; }, 3000);
-      },
-      error: (error: any) => {
-        console.error('Error creating account:', error);
-        this.errorMessage = error.error?.message || 'Failed to create account. Please try again.';
-        this.creating = false;
-      }
-    });
+    this.accountService.createAccount(newAccount)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (account: any) => {
+          this.successMessage = `Account "${account.name}" created successfully!`;
+          this.newAccountName = '';
+          this.newAccountBalance = 0;
+          this.newAccountType = '';
+          this.loadAccounts();
+          this.creating = false;
+
+          setTimeout(() => {
+            if (!this.destroy$.closed) {
+              this.successMessage = '';
+            }
+          }, 3000);
+        },
+        error: (error: any) => {
+          this.errorMessage = error?.error?.message || 'Failed to create account.';
+          this.creating = false;
+        }
+      });
   }
 
   deleteAccount(accountId: number): void {
@@ -116,17 +148,23 @@ this.analytics.getNet().subscribe(v => this.net = v);
       return;
     }
 
-    this.accountService.deleteAccount(accountId).subscribe({
-      next: () => {
-        this.successMessage = 'Account deleted successfully!';
-        this.loadAccounts();
-        setTimeout(() => { this.successMessage = ''; }, 3000);
-      },
-      error: (error: any) => {
-        console.error('Error deleting account:', error);
-        this.errorMessage = 'Failed to delete account. Please try again.';
-      }
-    });
+    this.accountService.deleteAccount(accountId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.successMessage = 'Account deleted successfully!';
+          this.loadAccounts();
+
+          setTimeout(() => {
+            if (!this.destroy$.closed) {
+              this.successMessage = '';
+            }
+          }, 3000);
+        },
+        error: () => {
+          this.errorMessage = 'Failed to delete account. Please try again.';
+        }
+      });
   }
 
   viewAccountDetails(accountId: number): void {
@@ -135,11 +173,13 @@ this.analytics.getNet().subscribe(v => this.net = v);
 
   formatCurrency(value: number | undefined | null): string {
     if (value === undefined || value === null) return '₹0.00';
+
     const absValue = Math.abs(value);
     const formatted = absValue.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
     });
+
     return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
   }
 }

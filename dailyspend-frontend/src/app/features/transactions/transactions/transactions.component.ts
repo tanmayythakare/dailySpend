@@ -8,4 +8,5 @@ import { TransactionListComponent } from '../transaction-list/transaction-list.c
   imports: [CommonModule, TransactionListComponent],
   templateUrl: './transactions.component.html'
 })
+
 export class TransactionsComponent {}

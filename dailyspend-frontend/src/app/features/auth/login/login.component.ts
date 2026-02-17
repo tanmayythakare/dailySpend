@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -11,7 +12,9 @@ import { AuthService } from '../../../core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnDestroy {
+
+  private destroy$ = new Subject<void>();
 
   credentials = {
     username: '',
@@ -26,6 +29,11 @@ export class LoginComponent {
     private router: Router
   ) {}
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   onSubmit(): void {
     if (!this.credentials.username || !this.credentials.password) {
       this.errorMessage = 'Please enter both username and password';
@@ -35,25 +43,22 @@ export class LoginComponent {
     this.loading = true;
     this.errorMessage = '';
 
-    this.authService.login(this.credentials).subscribe({
-      next: () => {
-        // AuthService.login() already stores the token via tap()
-        // No manual localStorage.setItem needed here
-        this.router.navigate(['/dashboard']);
-      },
-      error: (error) => {
-        console.error('Login error:', error);
-
-        if (error.status === 401) {
-          this.errorMessage = 'Invalid username or password';
-        } else if (error.status === 0) {
-          this.errorMessage = 'Cannot connect to server. Please check your connection.';
-        } else {
-          this.errorMessage = error.error?.message || 'Login failed. Please try again.';
+    this.authService.login(this.credentials)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          if (error.status === 401) {
+            this.errorMessage = 'Invalid username or password';
+          } else if (error.status === 0) {
+            this.errorMessage = 'Cannot connect to server. Please check your connection.';
+          } else {
+            this.errorMessage = error.error?.message || 'Login failed. Please try again.';
+          }
+          this.loading = false;
         }
-
-        this.loading = false;
-      }
-    });
+      });
   }
 }

@@ -1,23 +1,24 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AccountService } from '../../../core/services/account.service';
 import { Account } from '../../../models/account.model';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-account-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule,FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './account-detail.component.html',
   styleUrls: ['./account-detail.component.scss']
 })
-export class AccountDetailComponent implements OnInit {
+export class AccountDetailComponent implements OnInit, OnDestroy {
 
   private route = inject(ActivatedRoute);
   private accountService = inject(AccountService);
+  private destroy$ = new Subject<void>();
 
   account?: Account;
   loading = true;
@@ -26,16 +27,23 @@ export class AccountDetailComponent implements OnInit {
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
 
-    this.accountService.getAll().subscribe({
-      next: (accounts) => {
-        this.account = accounts.find(a => a.id === id);
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Failed to load account details.';
-        this.loading = false;
-      }
-    });
+    this.accountService.getAll()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (accounts) => {
+          this.account = accounts.find(a => a.id === id);
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'Failed to load account details.';
+          this.loading = false;
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   formatCurrency(value: number | undefined): string {

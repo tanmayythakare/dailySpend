@@ -1,151 +1,78 @@
-/* ═══════════════════════════════════════════════════════════════════
-   Transaction Form Component
-═══════════════════════════════════════════════════════════════════ */
+.transaction-form-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
 
-.transaction-form {
+.form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
 
-  /* ── Page Header ──────────────────────────────────────────────── */
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--space-6);
+.form-card {
+  background: var(--surface-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+
+.type-selector {
+  margin-bottom: var(--space-6);
+}
+
+.type-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+  background: var(--gray-100);
+  padding: 4px;
+  border-radius: var(--radius-md);
+}
+
+.type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+.type-btn:focus-visible {
+  outline: 3px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+.type-btn.active {
+  background: #fff;
+  box-shadow: var(--shadow-xs);
+  font-weight: 600;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
   }
-
-  &__back-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-size: 14px;
-    color: var(--gray-600);
-    text-decoration: none;
-    transition: color var(--transition-fast);
-
-    &:hover { color: var(--brand-600); }
-    svg { width: 16px; height: 16px; }
-  }
-
-  &__title {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--gray-900);
-  }
-
-  /* ── Form Card ────────────────────────────────────────────────── */
-  &__card {
-    background: var(--surface-card);
-    border-radius: var(--radius-lg);
-    border: 1px solid rgba(0,0,0,0.05);
-    box-shadow: var(--shadow-sm);
-    padding: var(--space-6);
-    max-width: 640px;
-    margin: 0 auto;
-    animation: pageFadeIn 250ms ease both;
-  }
-
-  /* ── Transaction Type Selector ────────────────────────────────── */
-  &__type-selector {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
-    margin-bottom: var(--space-6);
-    background: var(--gray-100);
-    border-radius: var(--radius-md);
-    padding: 4px;
-  }
-
-  &__type-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-3) var(--space-2);
-    border-radius: var(--radius-sm);
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gray-600);
-    transition: all var(--transition-med);
-
-    .type-icon {
-      font-size: 18px;
-      line-height: 1;
-    }
-
-    &:hover {
-      background: rgba(255,255,255,0.7);
-      color: var(--gray-800);
-    }
-
-    &.active {
-      background: #fff;
-      box-shadow: var(--shadow-xs);
-      color: var(--brand-700);
-      font-weight: 600;
-    }
-
-    &.active-expense {
-      color: var(--negative-text);
-      background: #fff;
-      box-shadow: var(--shadow-xs);
-    }
-    &.active-money-taken {
-      color: var(--positive-text);
-      background: #fff;
-      box-shadow: var(--shadow-xs);
-    }
-  }
-
-  /* ── Form Fields ──────────────────────────────────────────────── */
-  &__fields {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  &__row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-4);
-
-    @media (max-width: 520px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* ── Amount field — larger, prominent */
-  &__amount-field {
-    input {
-      font-size: 22px;
-      font-weight: 600;
-      font-family: var(--font-mono);
-      height: 52px;
-      color: var(--gray-900);
-      letter-spacing: -0.5px;
-    }
-  }
-
-  /* ── Submit Row ───────────────────────────────────────────────── */
-  &__actions {
-    display: flex;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
-    padding-top: var(--space-5);
-    border-top: 1px solid var(--gray-100);
-
-    .submit-btn {
-      flex: 1;
-      justify-content: center;
-      height: 42px;
-      font-size: 14px;
-      font-weight: 600;
-    }
-
-    .cancel-btn {
-      height: 42px;
-    }
-  }
+}
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -45,35 +45,46 @@
   <!-- Charts Row -->
   <div class="charts-row">
 
-    <!-- Spending Trend Line Chart -->
-    <div class="chart-card chart-card--wide">
-      <div class="chart-card-header">
-        <span class="chart-title">Spending Trend</span>
-      </div>
-      <div class="chart-canvas-wrap">
-        <canvas id="trendChart"></canvas>
-      </div>
-      <div class="chart-legend">
-        <span class="legend-dot legend-income"></span><span class="legend-label">Income</span>
-        <span class="legend-dot legend-expense"></span><span class="legend-label">Expense</span>
-      </div>
-    </div>
+   <!-- Spending Trend Line Chart -->
+<div class="chart-card chart-card--wide">
+  <div class="chart-card-header">
+    <span class="chart-title">Spending Trend</span>
+  </div>
+
+  <apx-chart
+    [series]="trendSeries"
+    [chart]="trendChart"
+    [xaxis]="trendXAxis"
+    [stroke]="trendStroke"
+    [dataLabels]="trendDataLabels"
+    [legend]="trendLegend"
+    [tooltip]="trendTooltip">
+  </apx-chart>
+
+  <div class="chart-legend">
+    <span class="legend-dot legend-income"></span>
+    <span class="legend-label">Income</span>
+
+    <span class="legend-dot legend-expense"></span>
+    <span class="legend-label">Expense</span>
+  </div>
+</div>
 
     <!-- Expense Breakdown Donut -->
     <div class="chart-card chart-card--donut">
-      <div class="chart-card-header">
-        <span class="chart-title">Expense Breakdown</span>
-      </div>
-      <div class="donut-wrap">
-        <canvas id="donutChart"></canvas>
-      </div>
-      <div class="donut-legend">
-        <div class="legend-item" *ngFor="let item of donutLegend">
-          <span class="legend-dot" [style.background]="item.color"></span>
-          <span class="legend-name">{{ item.label }}</span>
-        </div>
-      </div>
-    </div>
+  <div class="chart-card-header">
+    <span class="chart-title">Expense Breakdown</span>
+  </div>
+
+  <apx-chart
+    [series]="donutSeries"
+    [chart]="donutChart"
+    [labels]="donutLabels"
+    [plotOptions]="donutPlotOptions"
+    [responsive]="donutResponsive">
+  </apx-chart>
+</div>
+
 
   </div>
 
