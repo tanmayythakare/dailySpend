@@ -228,7 +228,7 @@ dailyspend/
 | Page | Preview |
 |---|---|
 | Dashboard | ![Dashboard](docs/Screenshots/dashboard.png) |
-| Transactions | ![Transactions](docs/Screenshots/transactions.png) |
+| Transactions | ![Transactions](docs/Screenshots/transaction.png) |
 | People Ledger | ![People](docs/Screenshots/people.png) |
 | Reports | ![Reports](docs/Screenshots/reports.png) |
 
@@ -340,4 +340,5 @@ You are free to use, modify, and distribute this project for personal or commerc
 Made with ❤️ and ☕ | If you find this project useful, please ⭐ star the repository!
 
 </div>
+
 
