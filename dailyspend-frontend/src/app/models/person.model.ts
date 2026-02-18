@@ -1,27 +1,18 @@
-// Person Model
+// Backend PersonResponse: { id, name } only
 export interface Person {
-  id?: number;
+  id?:  number;
   name: string;
-  userId?: number;
-  balance?: number;
-  transactionCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-  deleted?: boolean;
 }
 
-// Person Request DTO (for creating/updating)
+// Backend PersonBalanceDto: { id, name, balance, createdAt }
+// Returned by GET /api/v1/people/with-balances
+export interface PersonBalanceDto {
+  id:        number;
+  name:      string;
+  balance:   number;
+  createdAt: string;
+}
+
 export interface PersonRequest {
   name: string;
-}
-
-// Person Response DTO (from backend)
-export interface PersonResponse {
-  id: number;
-  name: string;
-  userId: number;
-  balance: number;
-  transactionCount: number;
-  createdAt: string;
-  updatedAt: string;
 }

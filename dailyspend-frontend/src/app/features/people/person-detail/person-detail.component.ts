@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { TransactionService } from '../../../core/services/transaction.service';
+import { Subject, takeUntil } from 'rxjs';
+import { PersonService } from '../../../core/services/person.service';
+import { Person } from '../../../models/person.model';
+import { Transaction } from '../../../models/transaction.model';
 
 @Component({
   selector: 'app-person-detail',
@@ -10,54 +13,67 @@ import { TransactionService } from '../../../core/services/transaction.service';
   templateUrl: './person-detail.component.html',
   styleUrls: ['./person-detail.component.scss']
 })
-export class PersonDetailComponent implements OnInit {
+export class PersonDetailComponent implements OnInit, OnDestroy {
 
-  personId!: number;
+  private destroy$ = new Subject<void>();
 
-  // ✅ ADD THIS — template expects it
-  person: any = null;
-
-  transactions: any[] = [];
-  loading = false;
+  person:       Person | null = null;
+  transactions: Transaction[] = [];
+  loading       = false;
+  error         = '';
 
   constructor(
-    private route: ActivatedRoute,
-    private transactionService: TransactionService
+    private route:         ActivatedRoute,
+    private personService: PersonService
   ) {}
 
   ngOnInit(): void {
-    this.personId = Number(this.route.snapshot.paramMap.get('id'));
-
-    // Mock person until API added
-    this.person = {
-      id: this.personId,
-      name: 'Person ' + this.personId
-    };
-
-    this.loadTransactions();
+    const id = Number(this.route.snapshot.paramMap.get('id'));
+    this.loadPerson(id);
+    this.loadTransactions(id);
   }
 
-  loadTransactions(): void {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadPerson(id: number): void {
+    this.personService.getById(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next:  (person) => { this.person = person; },
+        error: ()       => { this.error  = 'Failed to load person details.'; }
+      });
+  }
+
+  private loadTransactions(id: number): void {
     this.loading = true;
-
-    // ⚠️ FIX — method may not exist
-    this.transactionService.getAll().subscribe({
-      next: (data: any) => {
-        // filter by personId
-        this.transactions = (data || []).filter(
-          (t: any) => t.personId === this.personId
-        );
-
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      }
-    });
+    // Uses GET /api/v1/people/:id/transactions
+    this.personService.getPersonTransactions(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (transactions) => {
+          this.transactions = transactions;
+          this.loading      = false;
+        },
+        error: () => { this.loading = false; }
+      });
   }
+
+  // MONEY_TAKEN = they gave us money (positive), MONEY_GIVEN = we gave them (negative)
   getBalance(): number {
     return this.transactions.reduce((sum, t) => {
-      return sum + (t.amount || 0);
+      if (t.type === 'MONEY_TAKEN') return sum + (t.amount || 0);
+      if (t.type === 'MONEY_GIVEN') return sum - (t.amount || 0);
+      return sum;
     }, 0);
+  }
+
+  formatCurrency(value: number | undefined | null): string {
+    if (value == null) return '₹0.00';
+    const abs = Math.abs(value);
+    const fmt = abs.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value < 0 ? `-₹${fmt}` : `₹${fmt}`;
   }
 }

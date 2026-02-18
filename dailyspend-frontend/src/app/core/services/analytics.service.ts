@@ -1,23 +1,24 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticsService {
 
-private base = '/api/v1/analytics';
+  constructor(private api: ApiService) {}
 
-constructor(private http: HttpClient) {}
+  // GET /api/v1/analytics/income
+  getIncome(): Observable<number> {
+    return this.api.get<number>('/v1/analytics/income');
+  }
 
-getIncome(): Observable<number> {
-return this.http.get<number>(`${this.base}/income`);
-}
+  // GET /api/v1/analytics/expense
+  getExpense(): Observable<number> {
+    return this.api.get<number>('/v1/analytics/expense');
+  }
 
-getExpense(): Observable<number> {
-return this.http.get<number>(`${this.base}/expense`);
-}
-
-getNet(): Observable<number> {
-return this.http.get<number>(`${this.base}/net`);
-}
+  // GET /api/v1/analytics/net
+  getNet(): Observable<number> {
+    return this.api.get<number>('/v1/analytics/net');
+  }
 }

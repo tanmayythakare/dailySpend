@@ -3,16 +3,14 @@
   <!-- Header -->
   <div class="list-header">
     <h1 class="page-title">People</h1>
-
     <button class="btn-add" (click)="showAddForm = !showAddForm">
-      {{ showAddForm ? '✕ Cancel' : '➕ Add Person' }}
+      {{ showAddForm ? '✕ Cancel' : '+ Add Person' }}
     </button>
   </div>
 
   <!-- Add Person Form -->
   <div class="add-person-card" *ngIf="showAddForm">
     <h3>Add New Person</h3>
-
     <form class="person-form" (ngSubmit)="addPerson()">
       <input
         type="text"
@@ -28,10 +26,10 @@
   </div>
 
   <!-- Messages -->
-  <div class="error-message" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="error-message"   *ngIf="errorMessage">{{ errorMessage }}</div>
   <div class="success-message" *ngIf="successMessage">{{ successMessage }}</div>
 
-  <!-- Loading State -->
+  <!-- Loading -->
   <div class="loading-state" *ngIf="loading && !people.length">
     <div class="spinner"></div>
     <p>Loading people...</p>
@@ -43,25 +41,17 @@
     <div class="person-card" *ngFor="let person of people">
 
       <div class="person-header">
-        <div class="person-avatar">
-          {{ getInitials(person.name) }}
-        </div>
+        <div class="person-avatar">{{ getInitials(person.name) }}</div>
         <div class="person-info">
           <h3>{{ person.name }}</h3>
           <p class="person-meta">
-            {{ person.transactionCount || 0 }} transaction{{ person.transactionCount === 1 ? '' : 's' }}
+            {{ getBalance(person) !== 0 ? 'Has activity' : 'No activity yet' }}
           </p>
         </div>
       </div>
 
       <div class="person-balance">
         <span class="balance-label">Balance</span>
-
-        <!--
-          NG2 FIX: person.balance is typed as optional (balance?: number).
-          Angular strict checking forbids comparing undefined to a number directly.
-          getBalance(person) always returns a number (0 when undefined).
-        -->
         <span
           class="balance-amount"
           [class.positive]="getBalance(person) > 0"
@@ -78,16 +68,11 @@
       </div>
 
       <div class="person-actions">
-        <button class="btn-view" (click)="viewDetails(person.id!)">
-          View Ledger
-        </button>
-        <button class="btn-delete" (click)="deletePerson(person.id!)">
-          Delete
-        </button>
+        <button class="btn-view"   (click)="viewDetails(person.id)">View Ledger</button>
+        <button class="btn-delete" (click)="deletePerson(person.id)">Delete</button>
       </div>
 
     </div>
-
   </div>
 
   <!-- Empty State -->

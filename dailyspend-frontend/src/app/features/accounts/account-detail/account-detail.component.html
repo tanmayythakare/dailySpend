@@ -9,26 +9,31 @@
     {{ error }}
   </div>
 
-  <div *ngIf="account" class="account-card card">
+  <div *ngIf="account as acc" class="account-card card">
 
     <h2 class="text-xl font-semibold mb-4">
-      {{ account.name }}
+      {{ acc.name }}
     </h2>
 
     <div class="account-meta">
+
       <div>
         <span class="text-muted">Type</span>
-        <p class="text-base">{{ account.type }}</p>
+        <p class="text-base">{{ acc.type }}</p>
       </div>
 
       <div>
         <span class="text-muted">Balance</span>
+
         <p class="amount amount--large"
-           [class.amount--positive]="account.balance >= 0"
-           [class.amount--negative]="account.balance < 0">
-          {{ formatCurrency(account.balance) }}
+           [class.amount--positive]="getBalance() >= 0"
+           [class.amount--negative]="getBalance() < 0">
+
+          {{ formatCurrency(acc.balance) }}
+
         </p>
       </div>
+
     </div>
 
   </div>

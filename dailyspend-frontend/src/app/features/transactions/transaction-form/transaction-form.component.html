@@ -1,188 +1,130 @@
-<div class="transaction-form-container">
+<div class="page-container">
 
-  <!-- Header -->
-  <div class="form-header">
-    <h1 class="page-title">
-      {{ isEditMode ? 'Edit Transaction' : 'New Transaction' }}
-    </h1>
-    <a routerLink="/transactions" class="btn-back">
+  <!-- Header — back link left, title centre -->
+  <div class="transaction-form__header">
+    <a class="transaction-form__back-btn" routerLink="/transactions">
       ← Back to Transactions
     </a>
+    <span class="transaction-form__title">
+      {{ isEditMode ? 'Edit Transaction' : 'New Transaction' }}
+    </span>
+    <span></span><!-- spacer keeps title centred -->
   </div>
 
   <!-- Form Card -->
-  <div class="form-card">
+  <div class="transaction-form__card">
 
     <!-- Messages -->
-    <div class="error-message" *ngIf="errorMessage" role="alert">
-      {{ errorMessage }}
+    <div class="alert alert--error"   *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert--success" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <!-- Type Selector — pill toggle -->
+    <div class="transaction-form__type-selector">
+
+      <button type="button"
+        class="transaction-form__type-option"
+        [class.active]="transactionData.type === 'EXPENSE'"
+        [class.active-expense]="transactionData.type === 'EXPENSE'"
+        (click)="selectType('EXPENSE')">
+        <span class="type-icon">💸</span>
+        Expense
+      </button>
+
+      <button type="button"
+        class="transaction-form__type-option"
+        [class.active]="transactionData.type === 'MONEY_GIVEN'"
+        (click)="selectType('MONEY_GIVEN')">
+        <span class="type-icon">➡️</span>
+        Money Given
+      </button>
+
+      <button type="button"
+        class="transaction-form__type-option"
+        [class.active]="transactionData.type === 'MONEY_TAKEN'"
+        [class.active-money-taken]="transactionData.type === 'MONEY_TAKEN'"
+        (click)="selectType('MONEY_TAKEN')">
+        <span class="type-icon">⬅️</span>
+        Money Taken
+      </button>
+
     </div>
 
-    <div class="success-message" *ngIf="successMessage" role="alert">
-      {{ successMessage }}
-    </div>
+    <!-- Fields -->
+    <form class="transaction-form__fields" (ngSubmit)="onSubmit()">
 
-    <!-- Transaction Type Selector -->
-    <div class="type-selector">
-      <h3>Transaction Type</h3>
-      <div class="type-buttons">
+      <!-- Account + Amount -->
+      <div class="transaction-form__row">
 
-        <button
-          type="button"
-          class="type-btn"
-          role="button"
-          [attr.aria-pressed]="transactionData.type === 'EXPENSE'"
-          [class.active]="transactionData.type === 'EXPENSE'"
-          (click)="selectType('EXPENSE')">
-          <div class="type-btn-icon">💸</div>
-          <div class="type-btn-label">Expense</div>
-        </button>
-
-        <button
-          type="button"
-          class="type-btn"
-          role="button"
-          [attr.aria-pressed]="transactionData.type === 'MONEY_GIVEN'"
-          [class.active]="transactionData.type === 'MONEY_GIVEN'"
-          (click)="selectType('MONEY_GIVEN')">
-          <div class="type-btn-icon">➡️</div>
-          <div class="type-btn-label">Money Given</div>
-        </button>
-
-        <button
-          type="button"
-          class="type-btn"
-          role="button"
-          [attr.aria-pressed]="transactionData.type === 'MONEY_TAKEN'"
-          [class.active]="transactionData.type === 'MONEY_TAKEN'"
-          (click)="selectType('MONEY_TAKEN')">
-          <div class="type-btn-icon">⬅️</div>
-          <div class="type-btn-label">Money Taken</div>
-        </button>
-
-      </div>
-    </div>
-
-    <!-- Transaction Form -->
-    <form class="transaction-form" (ngSubmit)="onSubmit()">
-
-      <!-- Account & Amount Row -->
-      <div class="form-row">
-
-        <div class="form-group">
-          <label for="account">
-            Account <span class="required">*</span>
-          </label>
-          <select
-            id="account"
-            name="account"
-            [(ngModel)]="transactionData.accountId"
-            required>
+        <div class="form-field">
+          <label for="account">Account <span style="color:var(--negative)">*</span></label>
+          <select id="account" name="account"
+            [(ngModel)]="transactionData.accountId" required>
             <option [ngValue]="null" disabled>Select an account</option>
-            <option
-  *ngFor="let account of accounts; trackBy: trackById"
-  [ngValue]="account.id">
-  {{ account.name }} ({{ formatCurrency(account.balance) }})
-</option>
-
+            <option *ngFor="let account of accounts" [ngValue]="account.id">
+              {{ account.name }} ({{ formatCurrency(account.balance) }})
+            </option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="amount">
-            Amount <span class="required">*</span>
-          </label>
-          <input
-            type="number"
-            id="amount"
-            name="amount"
-            class="amount-input"
+        <div class="form-field transaction-form__amount-field">
+          <label for="amount">Amount <span style="color:var(--negative)">*</span></label>
+          <input type="number" id="amount" name="amount"
             [(ngModel)]="transactionData.amount"
-            placeholder="0.00"
-            step="0.01"
-            min="0.01"
-            required
-          />
+            placeholder="0.00" step="0.01" min="0.01" required />
         </div>
 
       </div>
 
-      <!-- Category -->
-      <div class="form-group" *ngIf="transactionData.type === 'EXPENSE'">
+      <!-- Category (EXPENSE only) -->
+      <div class="form-field" *ngIf="transactionData.type === 'EXPENSE'">
         <label for="category">Category</label>
-        <select
-          id="category"
-          name="category"
-          [(ngModel)]="transactionData.categoryId">
+        <select id="category" name="category" [(ngModel)]="transactionData.categoryId">
           <option [ngValue]="null">Select a category (optional)</option>
-          <option *ngFor="let category of categories; trackBy: trackById" [ngValue]="category.id">
+          <option *ngFor="let category of categories" [ngValue]="category.id">
             {{ category.name }}
           </option>
         </select>
       </div>
 
-      <!-- Person -->
-      <div class="form-group" *ngIf="transactionData.type !== 'EXPENSE'">
-        <label for="person">
-          Person <span class="required">*</span>
-        </label>
-        <select
-          id="person"
-          name="person"
-          [(ngModel)]="transactionData.personId"
-          required>
+      <!-- Person (MONEY_GIVEN / MONEY_TAKEN) -->
+      <div class="form-field" *ngIf="transactionData.type !== 'EXPENSE'">
+        <label for="person">Person <span style="color:var(--negative)">*</span></label>
+        <select id="person" name="person"
+          [(ngModel)]="transactionData.personId" required>
           <option [ngValue]="null" disabled>Select a person</option>
-          <option *ngFor="let person of people; trackBy: trackById" [ngValue]="person.id">
+          <option *ngFor="let person of people" [ngValue]="person.id">
             {{ person.name }}
           </option>
         </select>
       </div>
 
       <!-- Date -->
-      <div class="form-group">
-        <label for="date">
-          Transaction Date <span class="required">*</span>
-        </label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          [(ngModel)]="transactionData.transactionDate"
-          required
-        />
+      <div class="form-field">
+        <label for="date">Transaction Date <span style="color:var(--negative)">*</span></label>
+        <input type="date" id="date" name="date"
+          [(ngModel)]="transactionData.transactionDate" required />
       </div>
 
       <!-- Description -->
-      <div class="form-group">
+      <div class="form-field">
         <label for="description">Description</label>
-        <textarea
-          id="description"
-          name="description"
+        <textarea id="description" name="description"
           [(ngModel)]="transactionData.description"
           placeholder="Add notes about this transaction..."
-          rows="3"
-        ></textarea>
-        <span class="form-hint">Optional but helpful for tracking</span>
+          rows="3"></textarea>
       </div>
 
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button
-          type="button"
-          class="btn-cancel"
-          routerLink="/transactions">
+      <!-- Actions -->
+      <div class="transaction-form__actions">
+        <button type="button" class="btn btn--outline cancel-btn" routerLink="/transactions">
           Cancel
         </button>
-
-        <button
-          type="submit"
-          class="btn-submit"
+        <button type="submit" class="btn btn--primary submit-btn"
           [disabled]="loading || !isFormValid()">
           {{ loading ? 'Saving...' : (isEditMode ? 'Update Transaction' : 'Create Transaction') }}
         </button>
       </div>
 
     </form>
-
   </div>
 </div>

@@ -1,3 +1,16 @@
+<!-- Inline Delete Confirm Modal -->
+<div class="confirm-overlay" *ngIf="confirmDeleteTxId">
+  <div class="confirm-modal">
+    <div class="confirm-icon">🗑️</div>
+    <h3 class="confirm-title">Delete Transaction?</h3>
+    <p class="confirm-text">This will permanently remove this transaction. This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" (click)="cancelDeleteTx()">Cancel</button>
+      <button class="confirm-btn-delete" (click)="deleteTransaction(confirmDeleteTxId!)">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
 <div class="transaction-list-container">
 
   <!-- Header -->
@@ -81,8 +94,7 @@
       </thead>
 
       <tbody>
-        <tr *ngFor="let transaction of transactions; trackBy: trackByTransaction"
->
+        <tr *ngFor="let transaction of transactions">
 
           <td class="date-cell" data-label="Date">
             {{ transaction.transactionDate | date: 'MMM d, yyyy' }}
@@ -119,7 +131,7 @@
             <button class="action-btn" (click)="editTransaction(transaction.id)">
               Edit
             </button>
-            <button class="action-btn delete" (click)="deleteTransaction(transaction.id)">
+            <button class="action-btn delete" (click)="requestDeleteTx(transaction.id)">
               Delete
             </button>
           </td>
@@ -147,7 +159,7 @@
         <button
           class="pagination-btn"
           [class.active]="currentPage === page"
-          *ngFor="let page of pageNumbers; trackBy: trackByPage"
+          *ngFor="let page of getPageNumbers()"
           (click)="goToPage(page)">
           {{ page }}
         </button>

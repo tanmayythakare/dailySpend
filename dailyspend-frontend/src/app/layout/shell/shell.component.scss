@@ -249,3 +249,15 @@
   background: var(--surface-bg);
   padding: 24px;
 }
+/* ── Sidebar spacer + pinned logout ─────────────────────────────── */
+.sidebar-spacer {
+  flex: 1;
+}
+
+.nav-bottom {
+  padding-bottom: 16px;
+}
+
+.nav-logout {
+  cursor: pointer;
+}

@@ -1,24 +1,9 @@
-@use '@angular/material' as mat;
+/* ═══════════════════════════════════════════════════════════════════
+   DailySpend — Global Styles
+   Design System: Clean finance app, white + purple accent, INR focus
+   Font: DM Sans (body) — loaded via index.html
+═══════════════════════════════════════════════════════════════════ */
 
-/* Angular Material core (must come after @use) */
-@include mat.core();
-
-/* THEN everything else below */
-
-/* Custom Theming */
-$dailyspend-frontend-primary: mat.define-palette(mat.$indigo-palette);
-$dailyspend-frontend-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
-$dailyspend-frontend-warn: mat.define-palette(mat.$red-palette);
-
-$dailyspend-frontend-theme: mat.define-light-theme((
-  color: (
-    primary: $dailyspend-frontend-primary,
-    accent: $dailyspend-frontend-accent,
-    warn: $dailyspend-frontend-warn,
-  )
-));
-
-@include mat.all-component-themes($dailyspend-frontend-theme);
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
 
 /* ── Design Tokens ──────────────────────────────────────────────── */
@@ -479,5 +464,84 @@ h1, h2, h3, h4, h5, h6 {
 .w-full       { width: 100%; }
 .mt-4         { margin-top: var(--space-4); }
 .mb-4         { margin-bottom: var(--space-4); }
-html, body { height: 100%; }
+/* ── Auth Pages (global — shared by login + register) ───────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-bg);
+  padding: var(--space-6);
+}
 
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface-card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(0,0,0,0.05);
+  padding: var(--space-8);
+}
+
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.auth-brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.auth-brand-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--space-2);
+  letter-spacing: -0.3px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: var(--space-6);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.auth-footer {
+  margin-top: var(--space-5);
+  text-align: center;
+  font-size: 13px;
+  color: var(--gray-500);
+
+  a {
+    color: var(--brand-600);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover { color: var(--brand-700); }
+  }
+}

@@ -1,60 +1,44 @@
-// =======================
-// Transaction Response
-// =======================
-
+// Matches backend TransactionResponse exactly — no 'version' field
 export interface Transaction {
-  id: number;
-
-  amount: number;
-
-  type: 'EXPENSE' | 'MONEY_GIVEN' | 'MONEY_TAKEN';
-
-  description?: string;
-
+  id:              number;
+  amount:          number;
+  type:            'EXPENSE' | 'MONEY_GIVEN' | 'MONEY_TAKEN';
+  description?:    string;
   transactionDate: string;
-
   account: {
-    id: number;
+    id:   number;
     name: string;
   };
-
   category?: {
-    id: number;
+    id:   number;
     name: string;
   };
-
   person?: {
-    id: number;
+    id:   number;
     name: string;
   };
-
-  version: number;
 }
 
-// =======================
-// Request DTOs
-// =======================
-
 export interface ExpenseRequest {
-  accountId: number;
-  categoryId: number;
-  amount: number;
-  description?: string;
+  accountId:       number;
+  categoryId:      number;
+  amount:          number;
+  description?:    string;
   transactionDate: string;
 }
 
 export interface MoneyGivenRequest {
-  accountId: number;
-  personId: number;
-  amount: number;
-  description?: string;
+  accountId:       number;
+  personId:        number;
+  amount:          number;
+  description?:    string;
   transactionDate: string;
 }
 
 export interface MoneyTakenRequest {
-  accountId: number;
-  personId: number;
-  amount: number;
-  description?: string;
+  accountId:       number;
+  personId:        number;
+  amount:          number;
+  description?:    string;
   transactionDate: string;
 }

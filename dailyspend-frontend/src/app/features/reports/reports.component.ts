@@ -1,18 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NgApexchartsModule } from 'ng-apexcharts';
+import { NgApexchartsModule } from "ng-apexcharts";
 import {
   ApexAxisChartSeries,
   ApexChart,
   ApexXAxis,
-  ApexDataLabels,
   ApexStroke,
+  ApexDataLabels,
   ApexLegend,
   ApexTooltip,
   ApexNonAxisChartSeries,
   ApexResponsive,
   ApexPlotOptions
-} from 'ng-apexcharts';
+} from "ng-apexcharts";
 
 import { TransactionService } from '../../core/services/transaction.service';
 
@@ -41,60 +41,71 @@ export class ReportsComponent implements OnInit {
     transactionCount: 0
   };
 
-  rawTransactions: any[] = [];
+  private rawTransactions: any[] = [];
 
-  // ───────── Line Chart ─────────
-  trendSeries: ApexAxisChartSeries = [];
-  trendChart: ApexChart = {
-    type: 'line',
-    height: 260,
-    toolbar: { show: false },
-    animations: { enabled: true }
+  constructor(private transactionService: TransactionService) {}
+
+  // ================= TREND CHART =================
+
+  public trendSeries: ApexAxisChartSeries = [];
+
+  public trendChart: ApexChart = {
+    type: "line",
+    height: 320,
+    toolbar: { show: false }
   };
 
-  trendXAxis: ApexXAxis = {
-    categories: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
+  public trendXAxis: ApexXAxis = {
+    categories: []
   };
 
-  trendStroke: ApexStroke = {
-    curve: 'smooth',
+  public trendStroke: ApexStroke = {
+    curve: "smooth",
     width: 3
   };
 
-  trendDataLabels: ApexDataLabels = { enabled: false };
-  trendLegend: ApexLegend = { show: false };
-
-  trendTooltip: ApexTooltip = {
-    y: {
-      formatter: (val) => this.formatCurrency(val)
-    }
+  public trendDataLabels: ApexDataLabels = {
+    enabled: false
   };
 
-  // ───────── Donut Chart ─────────
-  donutSeries: ApexNonAxisChartSeries = [];
-  donutLabels: string[] = [];
-
-  donutChart: ApexChart = {
-    type: 'donut',
-    height: 260
+  public trendLegend: ApexLegend = {
+    position: "top"
   };
 
-  donutPlotOptions: ApexPlotOptions = {
+  public trendTooltip: ApexTooltip = {
+    enabled: true
+  };
+
+  // ================= DONUT CHART =================
+
+  public donutSeries: ApexNonAxisChartSeries = [];
+
+  public donutChart: ApexChart = {
+    type: "donut",
+    height: 300
+  };
+
+  public donutLabels: string[] = [];
+
+  public donutPlotOptions: ApexPlotOptions = {
     pie: {
-      donut: { size: '70%' }
+      donut: { size: "70%" }
     }
   };
 
-  donutResponsive: ApexResponsive[] = [
+  public donutResponsive: ApexResponsive[] = [
     {
       breakpoint: 480,
-      options: {
-        chart: { height: 220 }
-      }
+      options: { chart: { width: 300 } }
     }
   ];
 
-  constructor(private transactionService: TransactionService) {}
+  private readonly DONUT_COLORS = [
+    '#A594F9', '#6E55E8', '#38BCA0', '#E8A24B',
+    '#E05252', '#60A5FA', '#F472B6'
+  ];
+
+  // =================================================
 
   ngOnInit(): void {
     this.loadData();
@@ -107,13 +118,10 @@ export class ReportsComponent implements OnInit {
       next: (response: any) => {
         this.rawTransactions = response.content || [];
         this.calculateSummary();
-        this.buildTrendChart();
-        this.buildDonutChart();
+        this.prepareCharts();
         this.loading = false;
       },
-      error: () => {
-        this.loading = false;
-      }
+      error: () => this.loading = false
     });
   }
 
@@ -123,7 +131,8 @@ export class ReportsComponent implements OnInit {
 
     this.rawTransactions.forEach(tx => {
       if (tx.type === 'MONEY_TAKEN') income += tx.amount;
-      else if (tx.type === 'EXPENSE' || tx.type === 'MONEY_GIVEN') expenses += tx.amount;
+      else if (tx.type === 'EXPENSE' || tx.type === 'MONEY_GIVEN')
+        expenses += tx.amount;
     });
 
     this.summary = {
@@ -134,55 +143,75 @@ export class ReportsComponent implements OnInit {
     };
   }
 
-  private buildTrendChart(): void {
-    const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+  // ================= PREPARE CHART DATA =================
 
-    const incomeData = [0, 0, 0, 0, 0, 0];
-    const expenseData = [0, 0, 0, 0, 0, 0];
+  private prepareCharts(): void {
+    this.prepareTrendChart();
+    this.prepareDonutChart();
+  }
 
-    const monthMap: Record<number, number> = {
-      8: 0, 9: 1, 10: 2, 11: 3, 0: 4, 1: 5
-    };
+  private prepareTrendChart(): void {
+    const months = this.buildRollingMonths();
+
+    const incomeData = new Array(6).fill(0);
+    const expenseData = new Array(6).fill(0);
 
     this.rawTransactions.forEach(tx => {
-      const date = new Date(tx.transactionDate);
-      const monthIndex = monthMap[date.getMonth()];
-      if (monthIndex === undefined) return;
+      const month = new Date(tx.transactionDate).getMonth();
+      const idx = months.monthIndices.indexOf(month);
+      if (idx === -1) return;
 
-      if (tx.type === 'MONEY_TAKEN')
-        incomeData[monthIndex] += tx.amount;
-
-      if (tx.type === 'EXPENSE' || tx.type === 'MONEY_GIVEN')
-        expenseData[monthIndex] += tx.amount;
+      if (tx.type === 'MONEY_TAKEN') incomeData[idx] += tx.amount;
+      else if (tx.type === 'EXPENSE' || tx.type === 'MONEY_GIVEN')
+        expenseData[idx] += tx.amount;
     });
 
+    this.trendXAxis = { categories: months.labels };
+
     this.trendSeries = [
-      { name: 'Income', data: incomeData },
-      { name: 'Expense', data: expenseData }
+      { name: "Income", data: incomeData },
+      { name: "Expense", data: expenseData }
     ];
   }
 
-  private buildDonutChart(): void {
-    const categoryMap = new Map<string, number>();
+  private prepareDonutChart(): void {
+    const catMap = new Map<string, number>();
 
     this.rawTransactions
       .filter(t => t.type === 'EXPENSE' && t.category)
       .forEach(tx => {
         const name = tx.category?.name ?? 'Other';
-        categoryMap.set(name, (categoryMap.get(name) || 0) + tx.amount);
+        catMap.set(name, (catMap.get(name) || 0) + tx.amount);
       });
 
-    if (categoryMap.size > 0) {
-      this.donutLabels = Array.from(categoryMap.keys());
-      this.donutSeries = Array.from(categoryMap.values());
-    } else {
-      this.donutLabels = ['Food', 'Transport', 'Shopping'];
-      this.donutSeries = [8000, 5000, 3000];
+    const sorted = Array.from(catMap.entries())
+      .sort((a, b) => b[1] - a[1]);
+
+    this.donutLabels = sorted.map(e => e[0]);
+    this.donutSeries = sorted.map(e => e[1]);
+  }
+
+  // ================= UTIL =================
+
+  private buildRollingMonths(): { labels: string[]; monthIndices: number[] } {
+    const NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const now = new Date();
+    const labels: string[] = [];
+    const monthIndices: number[] = [];
+
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      labels.push(NAMES[d.getMonth()]);
+      monthIndices.push(d.getMonth());
     }
+
+    return { labels, monthIndices };
   }
 
   formatCurrency(value: number): string {
-    if (!value) return '₹0';
+    if (value == null) return '₹0';
     return `₹${value.toLocaleString('en-IN')}`;
   }
 }

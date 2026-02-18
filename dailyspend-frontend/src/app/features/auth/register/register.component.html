@@ -1,88 +1,43 @@
-<div class="register-container">
-  <div class="register-card">
+<div class="auth-page">
+  <div class="auth-card">
 
-    <!-- Header -->
-    <div class="register-header">
-      <div class="logo">₹</div>
-      <h1 class="register-title">Create your account</h1>
-      <p class="register-subtitle">Start tracking your finances today</p>
+    <div class="auth-brand">
+      <div class="auth-brand-icon">₹</div>
+      <div class="auth-brand-name">DailySpend</div>
     </div>
 
-    <!-- Error Message -->
-    <div class="error-message"
-     *ngIf="errorMessage"
-     role="alert"
-     aria-live="assertive">
-  {{ errorMessage }}
-</div>
+    <h1 class="auth-title">Create your account</h1>
+    <p class="auth-subtitle">Start tracking your finances today</p>
 
-<div class="success-message"
-     *ngIf="successMessage"
-     role="status"
-     aria-live="polite">
-  {{ successMessage }}
-</div>
+    <div class="alert alert--error"   *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert alert--success" *ngIf="successMessage">{{ successMessage }}</div>
 
+    <form class="auth-form" (ngSubmit)="onSubmit()">
 
-    <!-- Register Form -->
-    <form class="register-form" (ngSubmit)="onSubmit()">
-
-      <div class="form-group">
+      <div class="form-field">
         <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
+        <input type="text" id="username" name="username"
           [(ngModel)]="registerData.username"
           placeholder="Choose a username"
-          required
-          autocomplete="username"
-        />
+          required autocomplete="username" />
       </div>
 
-      <div class="form-group">
-        <label for="email">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          [(ngModel)]="registerData.email"
-          placeholder="your@email.com"
-          required
-          autocomplete="email"
-        />
-      </div>
-
-      <div class="form-group">
+      <div class="form-field">
         <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
+        <input type="password" id="password" name="password"
           [(ngModel)]="registerData.password"
           placeholder="Create a strong password"
-          required
-          autocomplete="new-password"
-        />
-        <small class="password-hint">
-          At least 8 characters with uppercase, lowercase, number, and special character
-        </small>
+          required autocomplete="new-password" />
       </div>
 
-      <button
-        type="submit"
-        class="submit-btn"
-        [disabled]="loading"
-      >
+      <button class="btn btn--primary w-full" type="submit" [disabled]="loading">
         {{ loading ? 'Creating account...' : 'Create Account' }}
       </button>
 
     </form>
 
-    <!-- Footer -->
-    <div class="register-footer">
-      Already have an account?
-      <a routerLink="/login">Sign in</a>
+    <div class="auth-footer">
+      Already have an account? <a routerLink="/login">Sign in</a>
     </div>
 
   </div>

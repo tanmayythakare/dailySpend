@@ -1,18 +1,32 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 import { Observable } from 'rxjs';
-import { Person } from '../../models/person.model';
+import { Person, PersonBalanceDto } from '../../models/person.model';
+import { Transaction } from '../../models/transaction.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class PersonService {
 
   constructor(private api: ApiService) {}
 
-  // ── Core methods (used by transaction-list, person-detail) ───────────────
+  // GET /api/v1/people — returns { id, name } only
   getAll(): Observable<Person[]> {
     return this.api.get<Person[]>('/v1/people');
+  }
+
+  // GET /api/v1/people/:id
+  getById(id: number): Observable<Person> {
+    return this.api.get<Person>(`/v1/people/${id}`);
+  }
+
+  // GET /api/v1/people/with-balances — returns { id, name, balance, createdAt }
+  getAllWithBalances(): Observable<PersonBalanceDto[]> {
+    return this.api.get<PersonBalanceDto[]>('/v1/people/with-balances');
+  }
+
+  // GET /api/v1/people/:id/transactions
+  getPersonTransactions(id: number): Observable<Transaction[]> {
+    return this.api.get<Transaction[]>(`/v1/people/${id}/transactions`);
   }
 
   create(payload: { name: string }): Observable<Person> {
@@ -23,16 +37,8 @@ export class PersonService {
     return this.api.delete<void>(`/v1/people/${id}`);
   }
 
-  // ── Aliases used by people-list & transaction-form ───────────────────────
-  getAllPeople(): Observable<Person[]> {
-    return this.getAll();
-  }
-
-  createPerson(payload: { name: string }): Observable<Person> {
-    return this.create(payload);
-  }
-
-  deletePerson(id: number): Observable<void> {
-    return this.delete(id);
-  }
+  // Aliases for compatibility
+  getAllPeople(): Observable<Person[]> { return this.getAll(); }
+  createPerson(payload: { name: string }): Observable<Person> { return this.create(payload); }
+  deletePerson(id: number): Observable<void> { return this.delete(id); }
 }

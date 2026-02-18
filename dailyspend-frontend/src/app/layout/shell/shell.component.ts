@@ -13,86 +13,56 @@ import { filter } from 'rxjs';
 })
 export class ShellComponent implements OnInit {
 
-  isCollapsed = false;
+  isCollapsed  = false;
   isMobileOpen = false;
-  pageTitle = 'Dashboard';
+  pageTitle    = 'Dashboard';
 
   private routeTitles: { [key: string]: string } = {
-    '/dashboard': 'Dashboard',
-    '/transactions': 'Transactions',
+    '/dashboard':        'Dashboard',
+    '/transactions':     'Transactions',
     '/transactions/new': 'New Transaction',
-    '/people': 'People',
-    '/reports': 'Reports',
-    '/accounts': 'Accounts'
+    '/people':           'People',
+    '/reports':          'Reports',
+    '/accounts':         'Accounts'
   };
 
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // Update page title on route change
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.updatePageTitle(event.url);
-        this.closeMobileSidebar(); // Close mobile sidebar on navigation
+        this.closeMobileSidebar();
       });
-
-    // Set initial title
     this.updatePageTitle(this.router.url);
-
-    // Check screen size on init
     this.checkScreenSize();
   }
 
   @HostListener('window:resize', ['$event'])
-  onResize() {
-    this.checkScreenSize();
-  }
+  onResize(): void { this.checkScreenSize(); }
 
-  private checkScreenSize() {
+  private checkScreenSize(): void {
     if (window.innerWidth <= 1024) {
-      this.isCollapsed = false; // Don't collapse on mobile
-      this.isMobileOpen = false; // Close mobile menu
+      this.isCollapsed = false;
+      this.isMobileOpen = false;
     }
   }
 
-  private updatePageTitle(url: string) {
-    // Try exact match first
-    if (this.routeTitles[url]) {
-      this.pageTitle = this.routeTitles[url];
-      return;
-    }
-
-    // Try to match base route
+  private updatePageTitle(url: string): void {
+    if (this.routeTitles[url]) { this.pageTitle = this.routeTitles[url]; return; }
     const baseRoute = '/' + url.split('/')[1];
-    if (this.routeTitles[baseRoute]) {
-      this.pageTitle = this.routeTitles[baseRoute];
-      return;
-    }
-
-    // Default
+    if (this.routeTitles[baseRoute]) { this.pageTitle = this.routeTitles[baseRoute]; return; }
     this.pageTitle = 'DailySpend';
   }
 
-  toggleSidebar() {
-    if (window.innerWidth <= 1024) {
-      // Mobile: toggle sidebar visibility
-      this.isMobileOpen = !this.isMobileOpen;
-    } else {
-      // Desktop: toggle collapse
-      this.isCollapsed = !this.isCollapsed;
-    }
+  toggleSidebar(): void {
+    if (window.innerWidth <= 1024) this.isMobileOpen = !this.isMobileOpen;
+    else this.isCollapsed = !this.isCollapsed;
   }
 
-  closeMobileSidebar() {
-    this.isMobileOpen = false;
-  }
+  closeMobileSidebar(): void { this.isMobileOpen = false; }
 
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+  // authService.logout() already navigates to /login — don't call router.navigate again
+  logout(): void { this.authService.logout(); }
 }

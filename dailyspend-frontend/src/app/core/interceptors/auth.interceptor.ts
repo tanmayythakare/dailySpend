@@ -4,18 +4,16 @@ import { catchError, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-
   const authService = inject(AuthService);
   const token = authService.getToken();
 
+  // Skip auth header for login / register
   if (req.url.includes('/auth/')) {
     return next(req);
   }
 
   const authReq = token
-    ? req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` }
-      })
+    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
 
   return next(authReq).pipe(

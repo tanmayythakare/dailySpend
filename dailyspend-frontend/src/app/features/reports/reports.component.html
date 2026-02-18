@@ -1,40 +1,40 @@
 <div class="reports-container">
 
-  <!-- Header Row with currency -->
+  <!-- Header -->
   <div class="reports-header">
     <h1 class="page-title">Reports</h1>
   </div>
 
-  <!-- Summary Cards Row -->
+  <!-- Summary Cards -->
   <div class="summary-row">
 
+    <!-- Income -->
     <div class="stat-card">
-      <div class="stat-icon income-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-      </div>
       <div class="stat-body">
         <span class="stat-label">Total Income</span>
-        <span class="stat-value">{{ formatCurrency(summary.totalIncome) }}</span>
+        <span class="stat-value">
+          {{ formatCurrency(summary.totalIncome) }}
+        </span>
       </div>
     </div>
 
+    <!-- Expenses -->
     <div class="stat-card">
-      <div class="stat-icon expense-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
-      </div>
       <div class="stat-body">
         <span class="stat-label">Total Expenses</span>
-        <span class="stat-value">{{ formatCurrency(summary.totalExpenses) }}</span>
+        <span class="stat-value">
+          {{ formatCurrency(summary.totalExpenses) }}
+        </span>
       </div>
     </div>
 
+    <!-- Net Flow -->
     <div class="stat-card">
-      <div class="stat-icon net-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
-      </div>
       <div class="stat-body">
         <span class="stat-label">Net Flow</span>
-        <span class="stat-value" [class.positive]="summary.netFlow >= 0" [class.negative]="summary.netFlow < 0">
+        <span class="stat-value"
+              [class.positive]="summary.netFlow >= 0"
+              [class.negative]="summary.netFlow < 0">
           {{ formatCurrency(summary.netFlow) }}
         </span>
       </div>
@@ -42,53 +42,44 @@
 
   </div>
 
-  <!-- Charts Row -->
+  <!-- Charts -->
   <div class="charts-row">
 
-   <!-- Spending Trend Line Chart -->
-<div class="chart-card chart-card--wide">
-  <div class="chart-card-header">
-    <span class="chart-title">Spending Trend</span>
-  </div>
+    <!-- 📈 Spending Trend -->
+    <div class="chart-card chart-card--wide">
+      <div class="chart-card-header">
+        <span class="chart-title">Spending Trend</span>
+      </div>
 
-  <apx-chart
-    [series]="trendSeries"
-    [chart]="trendChart"
-    [xaxis]="trendXAxis"
-    [stroke]="trendStroke"
-    [dataLabels]="trendDataLabels"
-    [legend]="trendLegend"
-    [tooltip]="trendTooltip">
-  </apx-chart>
+      <apx-chart
+        [series]="trendSeries"
+        [chart]="trendChart"
+        [xaxis]="trendXAxis"
+        [stroke]="trendStroke"
+        [dataLabels]="trendDataLabels"
+        [legend]="trendLegend"
+        [tooltip]="trendTooltip">
+      </apx-chart>
+    </div>
 
-  <div class="chart-legend">
-    <span class="legend-dot legend-income"></span>
-    <span class="legend-label">Income</span>
-
-    <span class="legend-dot legend-expense"></span>
-    <span class="legend-label">Expense</span>
-  </div>
-</div>
-
-    <!-- Expense Breakdown Donut -->
+    <!-- 🍩 Expense Breakdown -->
     <div class="chart-card chart-card--donut">
-  <div class="chart-card-header">
-    <span class="chart-title">Expense Breakdown</span>
+      <div class="chart-card-header">
+        <span class="chart-title">Expense Breakdown</span>
+      </div>
+
+      <apx-chart
+        [series]="donutSeries"
+        [chart]="donutChart"
+        [labels]="donutLabels"
+        [plotOptions]="donutPlotOptions"
+        [responsive]="donutResponsive">
+      </apx-chart>
+    </div>
+
   </div>
 
-  <apx-chart
-    [series]="donutSeries"
-    [chart]="donutChart"
-    [labels]="donutLabels"
-    [plotOptions]="donutPlotOptions"
-    [responsive]="donutResponsive">
-  </apx-chart>
-</div>
-
-
-  </div>
-
-  <!-- Loading -->
+  <!-- Loading Overlay -->
   <div class="loading-overlay" *ngIf="loading">
     <div class="spinner"></div>
   </div>

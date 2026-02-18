@@ -1,38 +1,23 @@
-import { Injectable } from '@angular/core';
-import {
-  HttpErrorResponse,
-  HttpEvent,
-  HttpHandler,
-  HttpInterceptor,
-  HttpRequest
-} from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
-@Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
+export const errorInterceptor: HttpInterceptorFn = (req, next) => {
+  const snackBar = inject(MatSnackBar);
 
-  constructor(private snackBar: MatSnackBar) {}
-
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-
-        let errorMessage = 'Something went wrong';
-
-        if (error.error?.message) {
-          errorMessage = error.error.message;
-        }
-
-        this.snackBar.open(errorMessage, 'Close', {
-          duration: 3000,
-          horizontalPosition: 'right',
-          verticalPosition: 'top'
-        });
-
-        return throwError(() => error);
-      })
-    );
-  }
-}
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      let errorMessage = 'Something went wrong';
+      if (error.error?.message) {
+        errorMessage = error.error.message;
+      }
+      snackBar.open(errorMessage, 'Close', {
+        duration:           3000,
+        horizontalPosition: 'right',
+        verticalPosition:   'top'
+      });
+      return throwError(() => error);
+    })
+  );
+};

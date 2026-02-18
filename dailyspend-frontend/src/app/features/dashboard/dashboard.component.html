@@ -1,95 +1,69 @@
-<div class="dashboard-container">
-
-  <h1 class="page-title">Dashboard</h1>
-
-  <!-- Messages -->
-  <!-- Messages -->
-<div class="messages" *ngIf="successMessage || errorMessage">
-  <p class="success" *ngIf="successMessage" role="alert">
-    {{ successMessage }}
-  </p>
-
-  <p class="error" *ngIf="errorMessage" role="alert">
-    {{ errorMessage }}
-  </p>
+<!-- Inline Delete Confirm Modal -->
+<div class="confirm-overlay" *ngIf="confirmDeleteAcctId">
+  <div class="confirm-modal">
+    <div class="confirm-icon">🗑️</div>
+    <h3 class="confirm-title">Delete Account?</h3>
+    <p class="confirm-text">This will permanently remove this account and all its transactions. Cannot be undone.</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn-cancel" (click)="cancelDeleteAccount()">Cancel</button>
+      <button class="confirm-btn-delete" (click)="deleteAccount(confirmDeleteAcctId!)">Yes, Delete</button>
+    </div>
+  </div>
 </div>
 
+<div class="dashboard-container">
 
-  <!-- Create Account Section -->
+  <!-- Messages -->
+  <div *ngIf="successMessage || errorMessage" class="mb-4">
+    <div class="alert alert--success" *ngIf="successMessage">{{ successMessage }}</div>
+    <div class="alert alert--error"   *ngIf="errorMessage">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Net Worth Hero — top of page -->
+  <div class="net-worth-card">
+    <h2>Total Net Worth</h2>
+    <h1>{{ formatCurrency(totalBalance) }}</h1>
+  </div>
+
+  <!-- Create Account -->
   <div class="create-account-card">
     <h2>Create New Account</h2>
-
     <div class="form-grid">
-      <input
-        type="text"
-        placeholder="Account name"
-        [(ngModel)]="newAccountName"
-      />
-
-      <input
-        type="number"
-        placeholder="Initial balance"
-        [(ngModel)]="newAccountBalance"
-      />
+      <input type="text"   placeholder="Account name"    [(ngModel)]="newAccountName" />
+      <input type="number" placeholder="Initial balance" [(ngModel)]="newAccountBalance" />
 
       <select [(ngModel)]="newAccountType">
-        <option [ngValue]="''" disabled>Select type</option>
-        <option *ngFor="let type of accountTypes" [value]="type">
-          {{ type }}
-        </option>
+        <option value="" disabled selected>Select type</option>
+        <option *ngFor="let type of accountTypes" [value]="type">{{ type }}</option>
       </select>
 
-      <button
-        (click)="createAccount()"
-        [disabled]="creating"
-      >
+      <button (click)="createAccount()" [disabled]="creating">
         {{ creating ? 'Creating...' : 'Create Account' }}
       </button>
     </div>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading">
-    Loading your accounts...
-  </div>
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">Loading your accounts...</div>
 
   <!-- Accounts Grid -->
   <div class="accounts-grid" *ngIf="!loading && accounts.length > 0">
     <div class="account-card" *ngFor="let account of accounts; trackBy: trackByAccount">
-
       <h3>{{ account.name }}</h3>
-
-      <p>
-        <span>Type</span>
-        <strong>{{ account.type }}</strong>
-      </p>
-
-      <p>
-        <span>Balance</span>
-        <strong>{{ formatCurrency(account.balance) }}</strong>
-      </p>
-
-      <button (click)="deleteAccount(account.id!)">
-        Delete Account
-      </button>
+      <p><span>Type</span><strong>{{ account.type }}</strong></p>
+      <p><span>Balance</span><strong>{{ formatCurrency(account.balance) }}</strong></p>
+      <div style="display:flex;gap:8px;margin-top:16px;">
+        <button (click)="viewAccountDetails(account.id!)" style="flex:1">View</button>
+        <button (click)="requestDeleteAccount(account.id!)" style="flex:1">Delete</button>
+      </div>
     </div>
   </div>
-  
 
   <!-- Empty State -->
   <div *ngIf="!loading && accounts.length === 0" class="empty">
-    <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.3;">💳</div>
-    <div style="font-size: 16px; font-weight: 500; color: var(--text-secondary); margin-bottom: 8px;">
-      No accounts yet
-    </div>
-    <div style="font-size: 14px; color: var(--text-tertiary);">
-      Create your first account to start tracking your finances
-    </div>
-  </div>
-  <!-- Net Worth Card -->
-  <div class="net-worth-card">
-    <h2>Total Net Worth</h2>
-    <h1>{{ formatCurrency(totalBalance) }}</h1>
+    <div style="font-size:48px;margin-bottom:16px;opacity:0.3;">💳</div>
+    <div style="font-size:16px;font-weight:500;color:var(--gray-500);margin-bottom:8px;">No accounts yet</div>
+    <div style="font-size:14px;color:var(--gray-400);">Create your first account to start tracking your finances</div>
   </div>
 
 </div>

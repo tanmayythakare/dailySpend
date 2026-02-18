@@ -6,9 +6,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, RegisterRequest, AuthResponse } from '../../models/auth.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
 
   private readonly TOKEN_KEY = 'dailyspend_token';
@@ -20,17 +18,11 @@ export class AuthService {
   ) {}
 
   register(request: RegisterRequest): Observable<void> {
-    return this.http.post<void>(
-      `${environment.apiBaseUrl}/auth/register`,
-      request
-    );
+    return this.http.post<void>(`${environment.apiBaseUrl}/auth/register`, request);
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(
-      `${environment.apiBaseUrl}/auth/login`,
-      request
-    ).pipe(
+    return this.http.post<AuthResponse>(`${environment.apiBaseUrl}/auth/login`, request).pipe(
       tap(response => this.storeToken(response.token))
     );
   }
@@ -41,41 +33,30 @@ export class AuthService {
   }
 
   getToken(): string | null {
-    return isPlatformBrowser(this.platformId)
-      ? localStorage.getItem(this.TOKEN_KEY)
-      : null;
+    return isPlatformBrowser(this.platformId) ? localStorage.getItem(this.TOKEN_KEY) : null;
   }
 
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
-
     return !this.isTokenExpired(token);
   }
 
-  // ───────── PRIVATE HELPERS ─────────
-
   private storeToken(token: string): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem(this.TOKEN_KEY, token);
-    }
+    if (isPlatformBrowser(this.platformId)) localStorage.setItem(this.TOKEN_KEY, token);
   }
 
   private clearToken(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.TOKEN_KEY);
-    }
+    if (isPlatformBrowser(this.platformId)) localStorage.removeItem(this.TOKEN_KEY);
   }
 
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       if (!payload.exp) return false;
-
-      const expiry = payload.exp * 1000;
-      return Date.now() > expiry;
+      return Date.now() > payload.exp * 1000;
     } catch {
-      return true; // malformed token treated as invalid
+      return true;
     }
   }
 }

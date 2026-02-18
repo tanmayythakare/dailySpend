@@ -3,10 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-
 import { AccountService } from '../../core/services/account.service';
 import { Account } from '../../models/account.model';
-import { AnalyticsService } from '../../core/services/analytics.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,43 +18,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   accounts: Account[] = [];
-  loading = false;
-  creating = false;
+  loading   = false;
+  creating  = false;
 
   successMessage = '';
-  errorMessage = '';
+  errorMessage   = '';
 
-  newAccountName = '';
+  newAccountName    = '';
   newAccountBalance = 0;
-  newAccountType = '';
+  newAccountType    = '';
 
-  income = 0;
-  expense = 0;
-  net = 0;
-
-  accountTypes = ['CASH', 'BANK', 'CREDIT', 'WALLET'];
+  // Backend AccountType enum: CASH, BANK, CREDIT only
+  accountTypes = ['CASH', 'BANK', 'CREDIT'];
 
   totalBalance = 0;
 
-  constructor(
-    private accountService: AccountService,
-    private router: Router,
-    private analytics: AnalyticsService
-  ) {}
+  constructor(private accountService: AccountService, private router: Router) {}
 
-  ngOnInit(): void {
-    this.loadAccounts();
-    this.loadSummary();
-  }
+  ngOnInit(): void { this.loadAccounts(); }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  trackByAccount(_: number, account: Account): number {
-    return account.id!;
-  }
+  trackByAccount(_: number, account: Account): number { return account.id!; }
 
   loadAccounts(): void {
     this.loading = true;
@@ -65,9 +51,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.accountService.getAllAccounts()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (accounts: Account[]) => {
+        next: (accounts) => {
           this.accounts = accounts;
-          this.calculateTotalBalance();
+          this.totalBalance = accounts.reduce((sum, a) => sum + (a.balance ?? 0), 0);
           this.loading = false;
         },
         error: () => {
@@ -77,76 +63,42 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadSummary(): void {
-    this.analytics.getIncome()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(v => this.income = v);
-
-    this.analytics.getExpense()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(v => this.expense = v);
-
-    this.analytics.getNet()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(v => this.net = v);
-  }
-
-  calculateTotalBalance(): void {
-    this.totalBalance = this.accounts.reduce(
-      (sum, account) => sum + (account.balance ?? 0),
-      0
-    );
-  }
-
   createAccount(): void {
-    if (!this.newAccountName.trim()) {
-      this.errorMessage = 'Please enter an account name';
-      return;
-    }
-
-    if (!this.newAccountType) {
-      this.errorMessage = 'Please select an account type';
-      return;
-    }
+    if (!this.newAccountName.trim()) { this.errorMessage = 'Please enter an account name'; return; }
+    if (!this.newAccountType) { this.errorMessage = 'Please select an account type'; return; }
 
     this.creating = true;
     this.errorMessage = '';
     this.successMessage = '';
 
-    const newAccount = {
+    this.accountService.createAccount({
       name: this.newAccountName.trim(),
       balance: this.newAccountBalance || 0,
       type: this.newAccountType
-    };
-
-    this.accountService.createAccount(newAccount)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (account: any) => {
-          this.successMessage = `Account "${account.name}" created successfully!`;
-          this.newAccountName = '';
-          this.newAccountBalance = 0;
-          this.newAccountType = '';
-          this.loadAccounts();
-          this.creating = false;
-
-          setTimeout(() => {
-            if (!this.destroy$.closed) {
-              this.successMessage = '';
-            }
-          }, 3000);
-        },
-        error: (error: any) => {
-          this.errorMessage = error?.error?.message || 'Failed to create account.';
-          this.creating = false;
-        }
-      });
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (account: any) => {
+        this.successMessage = `Account "${account.name}" created successfully!`;
+        this.newAccountName = '';
+        this.newAccountBalance = 0;
+        this.newAccountType = '';
+        this.loadAccounts();
+        this.creating = false;
+        setTimeout(() => { if (!this.destroy$.closed) this.successMessage = ''; }, 3000);
+      },
+      error: (error: any) => {
+        this.errorMessage = error?.error?.message || 'Failed to create account.';
+        this.creating = false;
+      }
+    });
   }
 
+  confirmDeleteAcctId: number | null = null;
+
+  requestDeleteAccount(id: number): void { this.confirmDeleteAcctId = id; }
+  cancelDeleteAccount(): void { this.confirmDeleteAcctId = null; }
+
   deleteAccount(accountId: number): void {
-    if (!confirm('Are you sure you want to delete this account? All transactions will also be removed.')) {
-      return;
-    }
+    this.confirmDeleteAcctId = null;
 
     this.accountService.deleteAccount(accountId)
       .pipe(takeUntil(this.destroy$))
@@ -154,16 +106,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         next: () => {
           this.successMessage = 'Account deleted successfully!';
           this.loadAccounts();
-
-          setTimeout(() => {
-            if (!this.destroy$.closed) {
-              this.successMessage = '';
-            }
-          }, 3000);
+          setTimeout(() => { if (!this.destroy$.closed) this.successMessage = ''; }, 3000);
         },
-        error: () => {
-          this.errorMessage = 'Failed to delete account. Please try again.';
-        }
+        error: () => { this.errorMessage = 'Failed to delete account. Please try again.'; }
       });
   }
 
@@ -172,14 +117,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   formatCurrency(value: number | undefined | null): string {
-    if (value === undefined || value === null) return '₹0.00';
-
-    const absValue = Math.abs(value);
-    const formatted = absValue.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-
-    return value < 0 ? `-₹${formatted}` : `₹${formatted}`;
+    if (value == null) return '₹0.00';
+    const abs = Math.abs(value);
+    const fmt = abs.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value < 0 ? `-₹${fmt}` : `₹${fmt}`;
   }
 }

@@ -3,7 +3,7 @@ import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
 
-  // ───── Public Routes ─────
+  // Public
   {
     path: 'login',
     loadComponent: () =>
@@ -17,10 +17,14 @@ export const routes: Routes = [
         .then(m => m.RegisterComponent)
   },
 
-  // ───── Protected Routes ─────
+  // Protected layout
   {
     path: '',
     canActivateChild: [authGuard],
+    loadComponent: () =>
+      import('./layout/shell/shell.component')
+        .then(m => m.ShellComponent),
+
     children: [
 
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -40,6 +44,27 @@ export const routes: Routes = [
       },
 
       {
+        path: 'transactions/new',
+        loadComponent: () =>
+          import('./features/transactions/transaction-form/transaction-form.component')
+            .then(m => m.TransactionFormComponent)
+      },
+
+      {
+        path: 'transactions/:id/edit',
+        loadComponent: () =>
+          import('./features/transactions/transaction-form/transaction-form.component')
+            .then(m => m.TransactionFormComponent)
+      },
+
+      {
+        path: 'people',
+        loadComponent: () =>
+          import('./features/people/people-list/people-list.component')
+            .then(m => m.PeopleListComponent)
+      },
+
+      {
         path: 'people/:id',
         loadComponent: () =>
           import('./features/people/person-detail/person-detail.component')
@@ -51,10 +76,17 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/reports/reports.component')
             .then(m => m.ReportsComponent)
+      },
+
+      {
+        path: 'accounts',
+        loadComponent: () =>
+          import('./features/accounts/account-detail/account-detail.component')
+            .then(m => m.AccountDetailComponent)
       }
 
     ]
   },
-  // ───── Fallback ─────
+
   { path: '**', redirectTo: '' }
 ];
