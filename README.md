@@ -329,7 +329,7 @@ You are free to use, modify, and distribute this project for personal or commerc
 
 **Tanmay Thakare**
 
-- GitHub: [@tanmaythakare](https://github.com/tanmaythakare)
+- GitHub: [@tanmayythakare](https://github.com/tanmayythakare)
 - Email: tanmayrthakare@gmail.com
 - LinkedIn: www.linkedin.com/in/tanmaythakare
 
