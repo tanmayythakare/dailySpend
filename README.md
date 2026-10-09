@@ -1,4 +1,4 @@
-# 💸 DailySpend — Personal Finance Tracker
+# DailySpend — Personal Finance Tracker
 
 <p align="center">
   <a href="https://adoptium.net/"><img src="https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk" alt="Java 17"></a>
@@ -6,7 +6,7 @@
   <a href="https://angular.dev/"><img src="https://img.shields.io/badge/Angular-17.3-red?style=flat-square&logo=angular" alt="Angular 17.3"></a>
   <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-16-blue?style=flat-square&logo=postgresql" alt="PostgreSQL 16"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="MIT License"></a>
-  <a href="#-installation--setup"><img src="https://img.shields.io/badge/Deployment-Local-informational?style=flat-square" alt="Local Deployment"></a>
+  <a href="#installation-and-setup"><img src="https://img.shields.io/badge/Deployment-Local-informational?style=flat-square" alt="Local Deployment"></a>
 </p>
 
 <p align="center">
@@ -21,17 +21,17 @@
 
 ---
 
-## 📸 Visual Showcase
+## Visual Showcase
 
-| Dashboard & Accounts | Transactions & Ledger |
+| Dashboard and Accounts | Transactions and Ledger |
 | :---: | :---: |
 | ![Dashboard](docs/Screenshots/dashboard.png) | ![Transactions](docs/Screenshots/transaction.png) |
-| **People Ledger (Debts & Loans)** | **Reports & Expense Breakdowns** |
+| **People Ledger (Debts and Loans)** | **Reports and Expense Breakdowns** |
 | ![People](docs/Screenshots/people.png) | ![Reports](docs/Screenshots/reports.png) |
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
@@ -51,11 +51,11 @@ flowchart TD
 
 ---
 
-## 📖 What is DailySpend?
+## Overview
 
-**DailySpend** is a personal finance tracking web application designed to help you take control of your day-to-day money management. Whether you are logging grocery receipts, tracking money lent to friends, or analyzing monthly cash flow, DailySpend keeps it organized in one central place.
+DailySpend is a personal finance tracking web application designed to help you take control of day-to-day money management. Whether logging grocery receipts, tracking money lent to friends, or analyzing monthly cash flow, DailySpend keeps it organized in one central place.
 
-### Why does it exist?
+### Problem and Solution
 Most people struggle with financial leakage and fragmented tracking across disparate apps and notes. DailySpend provides:
 1. **Unified Cash Flow**: Clear separation between standard expenses and peer lending.
 2. **People Ledger**: Accurate balance tracking with friends and colleagues so you never lose track of who owes whom.
@@ -63,31 +63,31 @@ Most people struggle with financial leakage and fragmented tracking across dispa
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔐 **User Authentication** — Secure registration and login powered by stateless JWT tokens.
-- 🏦 **Multi-Account Management** — Manage distinct financial accounts (Cash, Bank, Credit).
-- 💳 **Transaction Tracking** — Record three distinct transaction types:
+- **User Authentication** — Secure registration and login powered by stateless JWT tokens.
+- **Multi-Account Management** — Manage distinct financial accounts (Cash, Bank, Credit).
+- **Transaction Tracking** — Record three distinct transaction types:
   - **Expense**: Outgoing spending with category classification.
   - **Money Given**: Peer lending tracked against individual contacts.
   - **Money Taken**: Loans received or money returned.
-- 👥 **People Ledger** — Real-time balance calculations per contact (net creditor/debtor status).
-- 🗂️ **Smart Categorization** — Built-in and customizable expense categories.
-- 📊 **Reports & Analytics** — Interactive spending trends and category breakdown charts via ApexCharts.
-- 🔍 **Filter & Search** — Filter transactions by type, account, and custom date range.
-- 📥 **CSV Export** — Download complete transaction histories for external analysis.
-- 📱 **Responsive UI** — Clean, responsive desktop and mobile interface built with Angular Material.
+- **People Ledger** — Real-time balance calculations per contact (net creditor/debtor status).
+- **Smart Categorization** — Built-in and customizable expense categories.
+- **Reports and Analytics** — Interactive spending trends and category breakdown charts via ApexCharts.
+- **Filter and Search** — Filter transactions by type, account, and custom date range.
+- **CSV Export** — Download complete transaction histories for external analysis.
+- **Responsive UI** — Clean, responsive desktop and mobile interface built with Angular Material.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 | Technology | Version | Purpose |
 | :--- | :--- | :--- |
 | **Java** | 17 LTS | Core programming language |
-| **Spring Boot** | 3.5.x | Application framework & dependency injection |
-| **Spring Security** | 6.x | Stateless JWT authentication & endpoint authorization |
+| **Spring Boot** | 3.5.x | Application framework and dependency injection |
+| **Spring Security** | 6.x | Stateless JWT authentication and endpoint authorization |
 | **Spring Data JPA** | 3.x | Object-Relational Mapping (Hibernate) with optimistic locking |
 | **PostgreSQL** | 16 | Relational database storage |
 | **Flyway** | 10.x | Version-controlled database schema migrations |
@@ -105,7 +105,7 @@ Most people struggle with financial leakage and fragmented tracking across dispa
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 Ensure the following tools are installed on your machine before running locally:
 
@@ -116,7 +116,7 @@ Ensure the following tools are installed on your machine before running locally:
 
 ---
 
-## 🚀 Installation & Setup
+## Installation and Setup
 
 ### 1. Clone the Repository
 ```bash
@@ -139,7 +139,6 @@ cd dailyspend-backend
 
 Create your local configuration from the provided template:
 ```bash
-# Copy the sanitized template
 cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
 ```
 
@@ -178,7 +177,7 @@ The Angular application starts on **http://localhost:4200**.
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 dailySpend/
@@ -214,7 +213,7 @@ dailySpend/
 
 ---
 
-## 🔌 API Reference
+## API Reference
 
 The backend exposes a REST API secured by JWT tokens:
 
@@ -233,22 +232,22 @@ The backend exposes a REST API secured by JWT tokens:
 
 ---
 
-## 🔮 Project Evolution & v2 Roadmap
+## Project Evolution and v2 Roadmap
 
 This codebase represents **DailySpend v1**. Active development and next-generation architecture have shifted to **[DailySpend v2 (dailySpend2)](https://github.com/tanmayythakare/dailySpend2)**:
 
 | Feature | DailySpend v1 (This Repo) | DailySpend v2 (dailySpend2) |
 | :--- | :---: | :---: |
-| **Core Expenses & Peer Ledger** | ✅ Supported | ✅ Supported |
-| **Interactive ApexCharts Reports** | ✅ Supported | ✅ Supported |
-| **Docker Compose Orchestration** | ❌ Manual Setup | ✅ 1-Command (`docker compose up`) |
-| **Recurring Transactions Engine** | ❌ Not in v1 | 🔄 Active Development |
-| **Bill Splitter Module** | ❌ Not in v1 | 🔄 Planned |
-| **Full Dark Mode Theme** | ❌ Not in v1 | 🔄 Integrated |
+| **Core Expenses and Peer Ledger** | Supported | Supported |
+| **Interactive ApexCharts Reports** | Supported | Supported |
+| **Docker Compose Orchestration** | Manual Setup | Supported (`docker compose up`) |
+| **Recurring Transactions Engine** | No | In Progress |
+| **Bill Splitter Module** | No | Planned |
+| **Full Dark Mode Theme** | No | Integrated |
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository.
 2. Clone your fork:
@@ -267,15 +266,21 @@ This codebase represents **DailySpend v1**. Active development and next-generati
 
 ---
 
-## 📄 License
+## License
 
 This project is open-source and distributed under the **[MIT License](LICENSE)**.
 
 ---
 
-## 👤 Author
+## Author
 
 **Tanmay Thakare**
 * GitHub: [@tanmayythakare](https://github.com/tanmayythakare)
 * Email: [tanmayrthakare@gmail.com](mailto:tanmayrthakare@gmail.com)
 * LinkedIn: [Tanmay Thakare](https://www.linkedin.com/in/tanmaythakare)
+
+---
+
+<div align="center">
+  <sub>Made with ❤️ by Tanmay Thakare</sub>
+</div>
