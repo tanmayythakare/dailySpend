@@ -35,12 +35,12 @@
 
 ```mermaid
 flowchart TD
-    Client["Browser / Angular 17.3 SPA\n(:4200)"]
-    API["Spring Boot 3.5 REST API\n(:8080)"]
-    Security["Spring Security + JWT Filter\n(Bearer Token Auth)"]
-    JPA["Spring Data JPA / Hibernate\n(Optimistic Locking)"]
-    Flyway["Flyway Migration Engine\n(db/migration)"]
-    DB[("PostgreSQL 16 Database\n(:5432)")]
+    Client["Browser / Angular 17.3 SPA<br/>(:4200)"]
+    API["Spring Boot 3.5 REST API<br/>(:8080)"]
+    Security["Spring Security + JWT Filter<br/>(Bearer Token Auth)"]
+    JPA["Spring Data JPA / Hibernate<br/>(Optimistic Locking)"]
+    Flyway["Flyway Migration Engine<br/>(db/migration)"]
+    DB[("PostgreSQL 16 Database<br/>(:5432)")]
 
     Client -->|"HTTP Requests + JWT"| API
     API --> Security
