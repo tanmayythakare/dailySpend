@@ -1,4 +1,8 @@
-# DailySpend — Personal Finance Tracker
+<div align="center">
+
+# DailySpend
+
+**Core Lightweight Personal Expense & Peer Lending Tracker**
 
 <p align="center">
   <a href="https://adoptium.net/"><img src="https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=openjdk" alt="Java 17"></a>
@@ -10,14 +14,33 @@
 </p>
 
 <p align="center">
-  A full-stack web application to track daily expenses, income, and peer lending — built with Spring Boot and Angular.
+  Clean, focused cash flow management and peer lending tracking.<br>
+  Built with Spring Boot 3.5, Angular 17.3, and PostgreSQL 16.
 </p>
+
+<p align="center">
+  <a href="#quick-flow">Quick Flow</a> •
+  <a href="#system-architecture">Architecture</a> •
+  <a href="#core-features">Features</a> •
+  <a href="#installation-and-setup">Setup</a> •
+  <a href="#api-reference">API Reference</a>
+</p>
+
+</div>
 
 ---
 
 > [!NOTE]
 > **Looking for the Next-Gen Edition?**
 > This repository is **DailySpend v1** (Core Lightweight Expense Tracker). For the containerized edition featuring Docker Compose, recurring transactions, and advanced financial analytics, check out **[DailySpend v2 (dailySpend2)](https://github.com/tanmayythakare/dailySpend2)**.
+
+---
+
+## Quick Flow
+
+```
+Register  →  Connect Accounts  →  Log Transactions  →  Calculate Net Balances  →  Visual Reports
+```
 
 ---
 
@@ -56,14 +79,13 @@ flowchart TD
 DailySpend is a personal finance tracking web application designed to help you take control of day-to-day money management. Whether logging grocery receipts, tracking money lent to friends, or analyzing monthly cash flow, DailySpend keeps it organized in one central place.
 
 ### Problem and Solution
-Most people struggle with financial leakage and fragmented tracking across disparate apps and notes. DailySpend provides:
 1. **Unified Cash Flow**: Clear separation between standard expenses and peer lending.
 2. **People Ledger**: Accurate balance tracking with friends and colleagues so you never lose track of who owes whom.
 3. **Actionable Insights**: Visual chart breakdowns by category and spending trends over time.
 
 ---
 
-## Features
+## Core Features
 
 - **User Authentication** — Secure registration and login powered by stateless JWT tokens.
 - **Multi-Account Management** — Manage distinct financial accounts (Cash, Bank, Credit).
@@ -177,45 +199,7 @@ The Angular application starts on **http://localhost:4200**.
 
 ---
 
-## Repository Structure
-
-```
-dailySpend/
-├── dailyspend-backend/                  # Spring Boot application
-│   ├── src/main/java/com/example/dailyspend/
-│   │   ├── config/                      # Security & web configuration
-│   │   ├── controller/                  # REST API controllers
-│   │   ├── dto/                         # Request & response DTOs
-│   │   ├── entity/                      # JPA entities (Account, Transaction, Person)
-│   │   ├── exception/                   # Global exception handler
-│   │   ├── repository/                  # Spring Data JPA repositories
-│   │   ├── service/                     # Business logic services
-│   │   └── util/                        # Security & token utilities
-│   ├── src/main/resources/
-│   │   ├── application.yaml             # Core application properties
-│   │   ├── application-local.yml.example# Local environment template
-│   │   └── db/migration/                # Flyway SQL migration scripts
-│   ├── pom.xml                          # Maven build dependencies
-│   └── mvnw.cmd                         # Windows Maven wrapper
-├── dailyspend-frontend/                 # Angular 17 SPA
-│   ├── src/app/
-│   │   ├── core/                        # Authentication guards, interceptors, services
-│   │   ├── features/                    # Dashboard, Transactions, People, Reports
-│   │   ├── layout/                      # Navbar, sidebar, app shell
-│   │   └── shared/                      # Reusable components & pipes
-│   ├── package.json                     # Frontend dependencies
-│   └── angular.json                     # Angular build configuration
-└── docs/
-    ├── ARCHITECTURE.md                  # Deep architectural specifications
-    ├── RULES.md                         # Engineering conventions
-    └── Screenshots/                     # System UI screenshots
-```
-
----
-
 ## API Reference
-
-The backend exposes a REST API secured by JWT tokens:
 
 | Method | Endpoint | Description | Auth Required |
 | :--- | :--- | :--- | :---: |
@@ -244,6 +228,38 @@ This codebase represents **DailySpend v1**. Active development and next-generati
 | **Recurring Transactions Engine** | No | In Progress |
 | **Bill Splitter Module** | No | Planned |
 | **Full Dark Mode Theme** | No | Integrated |
+
+---
+
+## Repository Structure
+
+```
+dailySpend/
+├── dailyspend-backend/                  # Spring Boot application
+│   ├── src/main/java/com/example/dailyspend/
+│   │   ├── config/                      # Security & web configuration
+│   │   ├── controller/                  # REST API controllers
+│   │   ├── dto/                         # Request & response DTOs
+│   │   ├── entity/                      # JPA entities (Account, Transaction, Person)
+│   │   ├── exception/                   # Global exception handler
+│   │   ├── repository/                  # Spring Data JPA repositories
+│   │   ├── service/                     # Business logic services
+│   │   └── util/                        # Security & token utilities
+│   ├── src/main/resources/
+│   │   ├── application.yaml             # Core application properties
+│   │   ├── application-local.yml.example# Local environment template
+│   │   └── db/migration/                # Flyway SQL migration scripts
+│   ├── pom.xml                          # Maven build dependencies
+│   └── mvnw.cmd                         # Windows Maven wrapper
+├── dailyspend-frontend/                 # Angular 17 SPA
+│   ├── src/app/                         # Core components, feature modules & routing
+│   ├── package.json                     # Frontend dependencies
+│   └── angular.json                     # Angular build configuration
+└── docs/
+    ├── ARCHITECTURE.md                  # Deep architectural specifications
+    ├── RULES.md                         # Engineering conventions
+    └── Screenshots/                     # System UI screenshots
+```
 
 ---
 
